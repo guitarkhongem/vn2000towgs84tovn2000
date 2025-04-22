@@ -87,12 +87,10 @@ with tab2:
 
 # Ghi chú nguồn công thức
 st.markdown("---")
-st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: **CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI CÓ ĐỊNH VỊ TÂM CHỤP CHÍNH XÁC**  
-"
-            "Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  
-"
-            "¹ Trường Đại học Mỏ - Địa chất  
-"
-            "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  
-"
-            "_Trình bày tại: HỘI NGHỊ KHOA HỌC QUỐC GIA VỀ CÔNG NGHỆ ĐỊA KHÔNG GIAN TRONG KHOA HỌC TRÁI ĐẤT VÀ MÔI TRƯỜNG_")
+st.markdown("""
+🔍 **Nguồn công thức**: Bài báo khoa học: **CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI CÓ ĐỊNH VỊ TÂM CHỤP CHÍNH XÁC**  
+Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  
+¹ Trường Đại học Mỏ - Địa chất  
+² Công ty CP Xây dựng và Thương mại QT Miền Bắc  
+_Trình bày tại: HỘI NGHỊ KHOA HỌC QUỐC GIA VỀ CÔNG NGHỆ ĐỊA KHÔNG GIAN TRONG KHOA HỌC TRÁI ĐẤT VÀ MÔI TRƯỜNG_
+""")
