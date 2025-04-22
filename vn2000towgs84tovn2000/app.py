@@ -5,8 +5,12 @@ from vn2000_to_wgs84_baibao import vn2000_to_wgs84_baibao
 
 st.set_page_config(page_title="VN2000 ➜ WGS84", layout="centered")
 
-# Logo
-st.image("logo.jpg", width=100)
+# Logo và tiêu đề phụ
+col1, col2 = st.columns([1, 3])
+with col1:
+    st.image("logo.jpg", width=100)
+with col2:
+    st.markdown("<h4 style='margin-top:40px;'>BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA</h4>", unsafe_allow_html=True)
 
 # Tiêu đề chính
 st.markdown("### 🛰️ VN2000 ➜ WGS84", unsafe_allow_html=True)
@@ -53,3 +57,15 @@ if st.button("🔁 Chuyển đổi"):
         st.dataframe(df, use_container_width=True)
     else:
         st.warning("⚠️ Không có dữ liệu hợp lệ.")
+
+# Ghi chú cuối trang
+st.markdown("---")
+st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: **CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI CÓ ĐỊNH VỊ TÂM CHỤP CHÍNH XÁC**  
+"
+            "Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  
+"
+            "¹ Trường Đại học Mỏ - Địa chất  
+"
+            "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  
+"
+            "_Trình bày tại: HỘI NGHỊ KHOA HỌC QUỐC GIA VỀ CÔNG NGHỆ ĐỊA KHÔNG GIAN TRONG KHOA HỌC TRÁI ĐẤT VÀ MÔI TRƯỜNG_")
