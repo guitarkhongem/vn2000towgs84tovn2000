@@ -47,6 +47,24 @@ if st.button("🔄 Chuyển đổi"):
 
 
 
+
+st.markdown("### 🧠 Quy trình tính nghịch: VN2000 ➜ WGS84 (từ dưới lên)")
+with st.expander("📘 Hiển thị chi tiết từng bước"):
+    st.markdown("""
+    #### Bước 4 ➜ Công thức (2):
+    **BL ➜ x, y** – Tính tọa độ phẳng từ tọa độ địa lý
+    
+    #### Bước 3 ➜ Công thức (5):
+    **XYZ ➜ BLH** – Chuyển từ tọa độ không gian về tọa độ địa lý
+    
+    #### Bước 2 ➜ Công thức (8):
+    **XYZ_WGS ➜ XYZ_VN** – Biến đổi hệ tọa độ theo 7 tham số Helmert nghịch
+
+    #### Bước 1 ➜ Công thức (4):
+    **BLH ➜ XYZ (WGS84)** – Tính tọa độ không gian từ tọa độ địa lý
+    """)
+
+
 st.markdown("### 🔄 Chuyển ngược từ WGS84 ➜ VN2000")
 
 lat_in = st.number_input("Vĩ độ (Lat)", value=16.77839862, format="%.8f", key="lat")
