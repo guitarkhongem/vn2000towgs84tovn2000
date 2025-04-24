@@ -56,13 +56,6 @@ with tab1:
         if results:
             df = pd.DataFrame(results, columns=["Vĩ độ (Lat)", "Kinh độ (Lon)", "Cao độ ellipsoid (H)"])
             st.dataframe(df)
-
-            # Chọn một điểm để xem trên bản đồ
-            selected_index = st.selectbox("🗺️ Chọn điểm để xem trên Google Maps", range(len(df)), format_func=lambda i: f"Điểm {i+1}")
-            selected_point = df.iloc[selected_index]
-            map_url = f"https://www.google.com/maps/@{selected_point['Vĩ độ (Lat)']},{selected_point['Kinh độ (Lon)']},18z"
-            st.markdown(f"[🌐 Mở Google Maps tại điểm này]({map_url})", unsafe_allow_html=True)
-    
             csv = df.to_csv(index=False).encode('utf-8')
             st.download_button("📥 Tải kết quả CSV", data=csv, file_name="VN2000_to_WGS84.csv", mime="text/csv")
         else:
@@ -110,13 +103,6 @@ with tab2:
         if results:
             df = pd.DataFrame(results, columns=["Hoành độ x", "Tung độ y", "Cao độ chuẩn (h)"])
             st.dataframe(df)
-
-            # Chọn một điểm để xem trên bản đồ
-            selected_index = st.selectbox("🗺️ Chọn điểm để xem trên Google Maps", range(len(df)), format_func=lambda i: f"Điểm {i+1}")
-            selected_point = df.iloc[selected_index]
-            map_url = f"https://www.google.com/maps/@{selected_point['Vĩ độ (Lat)']},{selected_point['Kinh độ (Lon)']},18z"
-            st.markdown(f"[🌐 Mở Google Maps tại điểm này]({map_url})", unsafe_allow_html=True)
-    
             csv = df.to_csv(index=False).encode('utf-8')
             st.download_button("📥 Tải kết quả CSV", data=csv, file_name="WGS84_to_VN2000.csv", mime="text/csv")
         else:
