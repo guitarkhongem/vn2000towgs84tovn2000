@@ -9,26 +9,41 @@ from functions import vn2000_to_wgs84_baibao, wgs84_to_vn2000_baibao
 import folium
 from streamlit_folium import st_folium
 
+import re
+
 def parse_coordinates(text, group=3):
     """
-    Chia token space/tab/newline thành groups of `group` float.
-    Hỗ trợ cả nhập STT đầu dòng sẽ bị bỏ qua.
+    Chia mọi token space/tab/newline thành nhóm `group` float.
+    Nếu token đầu của nhóm là số nguyên (STT), tự bỏ qua.
+    Trả về list các list float kích thước = group.
     """
-    # Thay thế tab và newline thành khoảng trắng rồi tách tokens
-    tokens = text.replace('\t', ' ').replace('\n', ' ').split()
+    # Tách mọi dấu space/tab/newline
+    tokens = re.split(r'\s+', text.strip())
     coords = []
     i = 0
-    # Lặp qua tokens theo từng nhóm `group`
-    while i + group <= len(tokens):
-        chunk = tokens[i:i+group]
-        try:
-            # Nếu cả chunk đều có thể float được => thêm vào kết quả
-            vals = list(map(float, chunk))
-            coords.append(vals)
+    while i < len(tokens):
+        # Nếu còn ít hơn group token, dừng
+        if len(tokens) - i < group:
+            break
+
+        # Kiểm tra STT: token[i] là số nguyên (no dot) và còn đủ group+1 token
+        if (re.fullmatch(r'\d+', tokens[i]) 
+            and len(tokens) - i >= group + 1):
+            # Bỏ qua STT
+            chunk = tokens[i+1 : i+1+group]
+            i += group + 1
+        else:
+            chunk = tokens[i : i+group]
             i += group
+
+        # Thử chuyển chunk thành float
+        try:
+            vals = [float(x) for x in chunk]
+            coords.append(vals)
         except ValueError:
-            # Nếu chunk không hợp lệ, bỏ qua token đầu và thử lại
-            i += 1
+            # Nếu không phải float (vd: STT lẫn trong chunk), bỏ qua và tiếp tục
+            continue
+
     return coords
 
 def render_map(df):
