@@ -153,4 +153,3 @@ st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: "
             "¹ Trường Đại học Mỏ - Địa chất  \n"
             "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  \n"
             "_Trình bày tại: HỘI NGHỊ KHOA HỌC QUỐC GIA VỀ CÔNG NGHỆ ĐỊA KHÔNG GIAN TRONG KHOA HỌC TRÁI ĐẤT VÀ MÔI TRƯỜNG_")
-
