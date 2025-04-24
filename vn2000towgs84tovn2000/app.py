@@ -1,142 +1,115 @@
 import streamlit as st
-st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="centered")
-
 import pandas as pd
 import math
-from functions import vn2000_to_wgs84_baibao, wgs84_to_vn2000_baibao
-
-# Hiển thị logo và tên đơn vị ngang hàng
-col_logo, col_title = st.columns([1, 5], gap="small")
-with col_logo:
-    st.image("logo.jpg", width=80)
-with col_title:
-    st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA")
-
-# Thư viện Folium
+import re
 import folium
 from streamlit_folium import st_folium
+from functions import vn2000_to_wgs84_baibao, wgs84_to_vn2000_baibao
 
-import re
+# Cấu hình trang
+st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
 
+# Header: logo + tiêu đề
+col1, col2 = st.columns([1, 5], gap="small")
+with col1:
+    st.image("logo.jpg", width=80)
+with col2:
+    st.title("VN2000 ⇄ WGS84 Converter")
+    st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA")
+
+# Hàm parse đầu vào (hỗ trợ space/tab/newline & STT dạng số hoặc ký tự)
 def parse_coordinates(text, group=3):
-    """
-    Chia token space/tab/newline thành nhóm `group` float.
-    Bỏ qua token STT nếu
-     - chứa ký tự chữ (A10, PT01…)
-     - hoặc là số nguyên không chứa dấu '.' khi nó đứng trước đủ group+1 token (ví dụ '10' trước X Y Z)
-    """
     tokens = re.split(r'\s+', text.strip())
     coords = []
     i = 0
     while i + group <= len(tokens):
         t0 = tokens[i]
-        # Bỏ STT chứa chữ hoặc số nguyên mà kế tiếp có đủ group giá trị
-        if re.search(r'[A-Za-z]', t0) or ('.' not in t0 and re.fullmatch(r'\d+', t0) and len(tokens) - i >= group+1):
+        # Bỏ qua STT nếu chứa chữ hoặc là số nguyên đứng trước đủ group+1 token
+        if (re.search(r'[A-Za-z]', t0)
+            or ('.' not in t0 and re.fullmatch(r'\d+', t0) and len(tokens) - i >= group+1)):
             i += 1
             continue
-
-        # Lấy nhóm group token
         chunk = tokens[i : i+group]
         try:
             vals = [float(x.replace(',', '.')) for x in chunk]
             coords.append(vals)
             i += group
         except ValueError:
-            # chunk chưa đúng, bỏ qua token đầu và thử lại
             i += 1
-
     return coords
 
+# Tabs cho chuyển đổi
+tab1, tab2 = st.tabs(["➡️ VN2000 → WGS84", "⬅️ WGS84 → VN2000"])
 
-def render_map(df):
-    """Hiển thị các điểm lên bản đồ vệ tinh Folium."""
-    if df is None or df.empty:
-        st.warning("⚠️ Không có dữ liệu để hiển thị bản đồ.")
-        return
+with tab1:
+    st.markdown("#### 🔢 Nhập tọa độ VN2000 (X Y Z – space/tab/newline hoặc kèm STT):")
+    in_vn = st.text_area("", height=120, key="vn_in")
+    lon0_vn = st.number_input("🌐 Kinh tuyến trục (°)", value=106.25, format="%.4f", key="lon0_vn")
+    if st.button("🔁 Chuyển WGS84"):
+        parsed = parse_coordinates(in_vn, group=3)
+        results = [vn2000_to_wgs84_baibao(x, y, z, lon0_vn) for x, y, z in parsed]
+        if results:
+            df = pd.DataFrame(results, columns=["Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"])
+            st.session_state.df = df
+        else:
+            st.warning("⚠️ Không có dữ liệu hợp lệ (cần 3 số mỗi bộ).")
 
-    # Đổi cột cho Folium
-    lat_col = "Vĩ độ (Lat)" if "Vĩ độ (Lat)" in df.columns else "latitude"
-    lon_col = "Kinh độ (Lon)" if "Kinh độ (Lon)" in df.columns else "longitude"
-    df_map = df.rename(columns={lat_col: "latitude", lon_col: "longitude"})
+with tab2:
+    st.markdown("#### 🔢 Nhập tọa độ WGS84 (Lat Lon H – space/tab/newline hoặc kèm STT):")
+    in_wg = st.text_area("", height=120, key="wg_in")
+    lon0_wg = st.number_input("🌐 Kinh tuyến trục (°)", value=106.25, format="%.4f", key="lon0_wg")
+    if st.button("🔁 Chuyển VN2000"):
+        parsed = parse_coordinates(in_wg, group=3)
+        results = [wgs84_to_vn2000_baibao(lat, lon, h, lon0_wg) for lat, lon, h in parsed]
+        if results:
+            df = pd.DataFrame(results, columns=["X (m)", "Y (m)", "h (m)"])
+            st.session_state.df = df
+        else:
+            st.warning("⚠️ Không có dữ liệu hợp lệ (cần 3 số mỗi bộ).")
 
+# Nếu có kết quả, hiển thị bảng và bản đồ
+if "df" in st.session_state:
+    df = st.session_state.df
+    st.markdown("### 📊 Kết quả chuyển đổi")
+    st.dataframe(df)
+
+    st.markdown("### 📍 Bản đồ vệ tinh với các điểm chuyển đổi")
     # Tọa độ trung tâm
-    center_lat = float(df_map["latitude"].mean())
-    center_lon = float(df_map["longitude"].mean())
+    center_lat = float(df["Vĩ độ (Lat)"].mean() if "Vĩ độ (Lat)" in df.columns else df["X (m)"].mean())
+    center_lon = float(df["Kinh độ (Lon)"].mean() if "Kinh độ (Lon)" in df.columns else df["Y (m)"].mean())
 
-    # Tạo bản đồ vệ tinh Esri
     m = folium.Map(
         location=[center_lat, center_lon],
         zoom_start=14,
         tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
         attr="Esri.WorldImagery"
     )
+    # Vẽ các điểm
+    if "Vĩ độ (Lat)" in df.columns:
+        for _, row in df.iterrows():
+            folium.CircleMarker(
+                location=(row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]),
+                radius=3, color="red", fill=True, fill_opacity=0.7
+            ).add_to(m)
+    else:
+        for _, row in df.iterrows():
+            folium.CircleMarker(
+                location=(row["X (m)"], row["Y (m)"]),
+                radius=3, color="red", fill=True, fill_opacity=0.7
+            ).add_to(m)
 
-    # Vẽ mỗi điểm dưới dạng CircleMarker nhỏ
-    for idx, row in df_map.iterrows():
-        folium.CircleMarker(
-            location=(row["latitude"], row["longitude"]),
-            radius=3,         # 3 pixel giống vị trí GPS
-            color="red",
-            fill=True,
-            fill_opacity=0.8,
-        ).add_to(m)
+    st_folium(m, width=800, height=500)
 
-    # Hiển thị trong Streamlit
-    st_folium(m, width=700, height=500)
-
-
-st.title("VN2000 ⇄ WGS84 Converter")
-
-tab1, tab2 = st.tabs(["➡️ VN2000 → WGS84", "⬅️ WGS84 → VN2000"])
-
-with tab1:
-    st.markdown("#### 🔢 Nhập tọa độ VN2000 (X Y Z – space/tab/newline):")
-    coords_input = st.text_area("", height=150, key="vn_in")
-    lon0 = st.number_input("🌐 Kinh tuyến trục (°)", value=106.25, format="%.4f", key="lon0_vn")
-    if st.button("🔁 Chuyển WGS84"):
-        parsed = parse_coordinates(coords_input, group=3)
-        results = []
-        for x, y, z in parsed:
-            lat, lon, h = vn2000_to_wgs84_baibao(x, y, z, lon0)
-            results.append((lat, lon, h))
-        if results:
-            df = pd.DataFrame(results, columns=["Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"])
-            st.session_state.df = df
-            st.dataframe(df)
-        else:
-            st.warning("⚠️ Không có dữ liệu hợp lệ (cần 3 số mỗi bộ).")
-
-with tab2:
-    st.markdown("#### 🔢 Nhập tọa độ WGS84 (Lat Lon H – space/tab/newline):")
-    coords_input = st.text_area("", height=150, key="wg_in")
-    lon0 = st.number_input("🌐 Kinh tuyến trục (°)", value=106.25, format="%.4f", key="lon0_wg")
-    if st.button("🔁 Chuyển VN2000"):
-        parsed = parse_coordinates(coords_input, group=3)
-        results = []
-        for lat, lon, h in parsed:
-            x, y, h_vn = wgs84_to_vn2000_baibao(lat, lon, h, lon0)
-            results.append((x, y, h_vn))
-        if results:
-            df = pd.DataFrame(results, columns=["X (m)", "Y (m)", "h (m)"])
-            st.session_state.df = df
-            st.dataframe(df)
-        else:
-            st.warning("⚠️ Không có dữ liệu hợp lệ (cần 3 số mỗi bộ).")
-
-# Nếu có DataFrame, vẽ bản đồ
-if "df" in st.session_state:
-    render_map(st.session_state.df)
-
+# Footer
 st.markdown("---")
 st.markdown(
     "Tác giả: Trần Trường Sinh  \n"
-    "Số điện thoại: 0917.750.555  \n"
+    "Số điện thoại: 0917.750.555"
 )
-st.markdown("---")
 st.markdown(
-    "🔍 **Nguồn công thức**: Bài báo khoa học: **CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI...**  \n"
+    "🔍 **Nguồn công thức**: Bài báo khoa học: **CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY...**  \n"
     "Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  \n"
     "¹ Trường Đại học Mỏ - Địa chất  \n"
     "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  \n"
-    "_Hội nghị Quốc Gia Về Công Nghệ Địa Không Gian, 2021_"
+    "_HỘI NGHỊ KHOA HỌC QUỐC GIA VỀ CÔNG NGHỆ ĐỊA KHÔNG GIAN TRONG KHOA HỌC TRÁI ĐẤT VÀ MÔI TRƯỜNG_"
 )
