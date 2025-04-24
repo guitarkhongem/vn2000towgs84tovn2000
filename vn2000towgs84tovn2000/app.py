@@ -11,10 +11,10 @@ with tab1:
     st.subheader("VN2000 ➜ WGS84")
     col1, col2 = st.columns(2)
     with col1:
-        x = st.number_input("🧮 Hoành độ x (m)", value=1855759.3584, format="%.10f", key="x_vn")
-        z = st.number_input("📏 Cao độ (m)", value=846.1115, format="%.4f", key="z_vn")
+        x = st.number_input("🧮 X (m)", value=1855759.3584, format="%.10f", key="x_vn")
+        z = st.number_input("📏 Z", value=846.1115, format="%.4f", key="z_vn")
     with col2:
-        y = st.number_input("🧮 Tung độ y (m)", value=546151.8072, format="%.10f", key="y_vn")
+        y = st.number_input("🧮 Y (m)", value=546151.8072, format="%.10f", key="y_vn")
         lon0 = st.number_input("🌐 Kinh tuyến trục (°)", value=106.25, key="lon0_vn")
 
     if st.button("🔄 Chuyển sang WGS84", key="btn1"):
@@ -48,4 +48,4 @@ st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: "
             "Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  \n"
             "¹ Trường Đại học Mỏ - Địa chất  \n"
             "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  \n"
-            "_Trình bày tại: HỘI NGHỊ KHOA HỌC QUỐC GIA VỀ CÔNG NGHỆ ĐỊA KHÔNG GIAN TRONG KHOA HỌC TRÁI ĐẤT VÀ MÔI TRƯỜNG_")
+            "_Trình bày tại: HỘI NGHỊ KHOA HỌC QUỐC GIA VỀ CÔNG NGHỆ ĐỊA KHÔNG GIAN TRONG KHOA HỌC TRÁI ĐẤT VÀ MÔI TRƯỜNG_"
