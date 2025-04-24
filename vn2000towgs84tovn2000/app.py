@@ -70,112 +70,7 @@ with tab1:
             # Hiển thị bản đồ tất cả điểm (dùng pydeck với chấm nhỏ)
             import pydeck as pdk
             if not df.empty and "Vĩ độ (Lat)" in df.columns and "Kinh độ (Lon)" in df.columns:
-                st.pydeck_chart(pdk.Deck(
-                    map_style="mapbox://styles/mapbox/streets-v12",
-                    initial_view_state=pdk.ViewState(
-                        latitude=df["Vĩ độ (Lat)"].mean(),
-                        longitude=df["Kinh độ (Lon)"].mean(),
-                        zoom=14,
-                        pitch=0,
-                    ),
-                    layers=[
-                        pdk.Layer(
-                            "ScatterplotLayer",
-                            data=df,
-                            get_position="[Kinh độ (Lon), Vĩ độ (Lat)]",
-                            get_color="[255, 0, 0, 160]",
-                            get_radius=1,
-                            radius_min_pixels=1,
-                            radius_max_pixels=2,
-                            pickable=False
-                        )
-                    ],
-                ))
-            else:
-                st.warning("⚠️ Không có dữ liệu để hiển thị bản đồ.")
-
-                map_style="mapbox://styles/mapbox/streets-v12",
-                initial_view_state=pdk.ViewState(
-                    latitude=df["Vĩ độ (Lat)"].mean(),
-                    longitude=df["Kinh độ (Lon)"].mean(),
-                    zoom=14,
-                    pitch=0,
-                ),
-                layers=[
-                    pdk.Layer(
-                        "ScatterplotLayer",
-                        data=df,
-                        get_position="[Kinh độ (Lon), Vĩ độ (Lat)]",
-                        get_color="[255, 0, 0, 160]",
-                        get_radius=1,
-                        radius_min_pixels=1,
-                        radius_max_pixels=2,
-                        pickable=False
-                    )
-                ],
-            ))
-
-    
-
-            # Chọn một điểm để xem trên bản đồ
-            selected_index = st.selectbox("🗺️ Chọn điểm để xem trên Google Maps", range(len(st.session_state.vn2000_df)) if st.session_state.get("vn2000_df") is not None else [], format_func=lambda i: f"Điểm {i+1}")
-            selected_point = st.session_state.vn2000_df.iloc[selected_index] if st.session_state.get("vn2000_df") is not None else None
-            map_url = f"https://www.google.com/maps/@{selected_point['Vĩ độ (Lat)']},{selected_point['Kinh độ (Lon)']},18z"
-            st.markdown(f"[🌐 Mở Google Maps tại điểm này]({map_url})", unsafe_allow_html=True)
-    
-            csv = df.to_csv(index=False).encode('utf-8')
-            st.download_button("📥 Tải kết quả CSV", data=csv, file_name="VN2000_to_WGS84.csv", mime="text/csv")
-        else:
-            st.warning("⚠️ Không có dữ liệu hợp lệ.")
-
-with tab2:
-    st.markdown("#### 🔢 Nhập tọa độ WGS84 (Lat Lon H – cách nhau bởi dấu cách, tab hoặc enter):")
-    coords_input = st.text_area("Mỗi dòng một điểm hoặc nhập liên tục", height=200, key="wgs84_input")
-    lon0 = st.selectbox("🌐 Chọn kinh tuyến trục (°)", [
-        102.75, 103.0, 103.5, 104.0, 104.25, 104.5, 105.0,
-        105.25, 105.5, 106.0, 106.25, 106.5, 107.0, 107.25,
-        107.5, 108.0, 108.25, 108.5, 109.0, 109.25, 109.5
-    ], index=10, key="lon0_wgs84")
-
-    if st.button("🔁 Chuyển sang VN2000"):
-        raw_data = coords_input.replace('\t', ' ').replace('\n', ' ').split()
-        points = []
-        i = 0
-        while i < len(raw_data):
-            try:
-                float(raw_data[i+1])
-                float(raw_data[i+2])
-                float(raw_data[i+3])
-                points.append([raw_data[i+1], raw_data[i+2], raw_data[i+3]])
-                i += 4
-            except:
-                try:
-                    float(raw_data[i])
-                    float(raw_data[i+1])
-                    float(raw_data[i+2])
-                    points.append([raw_data[i], raw_data[i+1], raw_data[i+2]])
-                    i += 3
-                except:
-                    i += 1
-
-        results = st.session_state.get("vn2000_results", [])
-        for p in points:
-            try:
-                lat, lon, h = map(float, p)
-                x, y, h_vn = wgs84_to_vn2000_baibao(lat, lon, h, lon0)
-                results.append((x, y, h_vn))
-            except:
-                continue
-
-        if results:
-            df = pd.DataFrame(results, columns=["Hoành độ x", "Tung độ y", "Cao độ chuẩn (h)"])
-            st.dataframe(df)
-
-            # Hiển thị tất cả điểm trên bản đồ
-            
-            # Hiển thị bản đồ tất cả điểm (dùng pydeck với chấm nhỏ)
-            import pydeck as pdk
-            
+                
             # Hiển thị bản đồ tất cả điểm (dùng pydeck với chấm nhỏ)
             import pydeck as pdk
             if not df.empty and "Vĩ độ (Lat)" in df.columns and "Kinh độ (Lon)" in df.columns:
@@ -202,41 +97,9 @@ with tab2:
                 ))
             else:
                 st.warning("⚠️ Không có dữ liệu để hiển thị bản đồ.")
-
-                map_style="mapbox://styles/mapbox/streets-v12",
-                initial_view_state=pdk.ViewState(
-                    latitude=df["Vĩ độ (Lat)"].mean(),
-                    longitude=df["Kinh độ (Lon)"].mean(),
-                    zoom=14,
-                    pitch=0,
-                ),
-                layers=[
-                    pdk.Layer(
-                        "ScatterplotLayer",
-                        data=df,
-                        get_position="[Kinh độ (Lon), Vĩ độ (Lat)]",
-                        get_color="[255, 0, 0, 160]",
-                        get_radius=1,
-                        radius_min_pixels=1,
-                        radius_max_pixels=2,
-                        pickable=False
-                    )
-                ],
-            ))
-
     
 
-            # Chọn một điểm để xem trên bản đồ
-            selected_index = st.selectbox("🗺️ Chọn điểm để xem trên Google Maps", range(len(st.session_state.vn2000_df)) if st.session_state.get("vn2000_df") is not None else [], format_func=lambda i: f"Điểm {i+1}")
-            selected_point = st.session_state.vn2000_df.iloc[selected_index] if st.session_state.get("vn2000_df") is not None else None
-            map_url = f"https://www.google.com/maps/@{selected_point['Vĩ độ (Lat)']},{selected_point['Kinh độ (Lon)']},18z"
-            st.markdown(f"[🌐 Mở Google Maps tại điểm này]({map_url})", unsafe_allow_html=True)
-    
-            csv = df.to_csv(index=False).encode('utf-8')
-            st.download_button("📥 Tải kết quả CSV", data=csv, file_name="WGS84_to_VN2000.csv", mime="text/csv")
-        else:
-            st.warning("⚠️ Không có dữ liệu hợp lệ.")
-
+# Bản đồ đã xử lý an toàn
 # Ghi chú cuối trang
 st.markdown("---")
 st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: "
@@ -245,3 +108,4 @@ st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: "
             "¹ Trường Đại học Mỏ - Địa chất  \n"
             "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  \n"
             "_Trình bày tại: HỘI NGHỊ KHOA HỌC QUỐC GIA VỀ CÔNG NGHỆ ĐỊA KHÔNG GIAN TRONG KHOA HỌC TRÁI ĐẤT VÀ MÔI TRƯỜNG_")
+
