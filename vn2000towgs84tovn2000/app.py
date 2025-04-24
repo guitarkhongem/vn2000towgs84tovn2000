@@ -24,9 +24,30 @@ with tab1:
 
     if st.button("🔁 Chuyển sang WGS84"):
         
-        lines = coords_input.strip().split('\n')
-        points = []
-        for line in lines:
+        
+        raw_data = coords_input.replace('\t', ' ').replace('\n', ' ').split()
+        temp = []
+        i = 0
+        while i < len(raw_data):
+            try:
+                # Thử lấy 4 phần tử, nếu phần đầu không phải số thực thì bỏ
+                float(raw_data[i+1])
+                float(raw_data[i+2])
+                float(raw_data[i+3])
+                temp.append([raw_data[i+1], raw_data[i+2], raw_data[i+3]])
+                i += 4
+            except:
+                try:
+                    # Nếu 3 phần tử liền nhau là tọa độ thì giữ
+                    float(raw_data[i])
+                    float(raw_data[i+1])
+                    float(raw_data[i+2])
+                    temp.append([raw_data[i], raw_data[i+1], raw_data[i+2]])
+                    i += 3
+                except:
+                    i += 1
+        points = temp
+
             parts = line.replace('\t', ' ').strip().split()
             if len(parts) == 4:  # Bỏ STT đầu tiên
                 parts = parts[1:]
@@ -69,9 +90,30 @@ with tab2:
 
     if st.button("🔁 Chuyển sang VN2000"):
         
-        lines = coords_input.strip().split('\n')
-        points = []
-        for line in lines:
+        
+        raw_data = coords_input.replace('\t', ' ').replace('\n', ' ').split()
+        temp = []
+        i = 0
+        while i < len(raw_data):
+            try:
+                # Thử lấy 4 phần tử, nếu phần đầu không phải số thực thì bỏ
+                float(raw_data[i+1])
+                float(raw_data[i+2])
+                float(raw_data[i+3])
+                temp.append([raw_data[i+1], raw_data[i+2], raw_data[i+3]])
+                i += 4
+            except:
+                try:
+                    # Nếu 3 phần tử liền nhau là tọa độ thì giữ
+                    float(raw_data[i])
+                    float(raw_data[i+1])
+                    float(raw_data[i+2])
+                    temp.append([raw_data[i], raw_data[i+1], raw_data[i+2]])
+                    i += 3
+                except:
+                    i += 1
+        points = temp
+
             parts = line.replace('\t', ' ').strip().split()
             if len(parts) == 4:  # Bỏ STT đầu tiên
                 parts = parts[1:]
@@ -111,3 +153,4 @@ st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: "
             "¹ Trường Đại học Mỏ - Địa chất  \n"
             "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  \n"
             "_Trình bày tại: HỘI NGHỊ KHOA HỌC QUỐC GIA VỀ CÔNG NGHỆ ĐỊA KHÔNG GIAN TRONG KHOA HỌC TRÁI ĐẤT VÀ MÔI TRƯỜNG_")
+
