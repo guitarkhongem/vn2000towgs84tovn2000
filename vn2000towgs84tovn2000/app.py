@@ -1,9 +1,10 @@
-import pandas as pd
 
 import streamlit as st
+import pandas as pd
 from functions import vn2000_to_wgs84_baibao, wgs84_to_vn2000_baibao
 
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="centered")
+
 col_logo, col_title = st.columns([1, 5])
 with col_logo:
     st.image("logo.jpg", width=90)
@@ -23,59 +24,40 @@ with tab1:
     ], index=10, key="lon0_vn2000")
 
     if st.button("🔁 Chuyển sang WGS84"):
-        
-        
         raw_data = coords_input.replace('\t', ' ').replace('\n', ' ').split()
-        temp = []
+        points = []
         i = 0
         while i < len(raw_data):
             try:
-                # Thử lấy 4 phần tử, nếu phần đầu không phải số thực thì bỏ
                 float(raw_data[i+1])
                 float(raw_data[i+2])
                 float(raw_data[i+3])
-                temp.append([raw_data[i+1], raw_data[i+2], raw_data[i+3]])
+                points.append([raw_data[i+1], raw_data[i+2], raw_data[i+3]])
                 i += 4
             except:
                 try:
-                    # Nếu 3 phần tử liền nhau là tọa độ thì giữ
                     float(raw_data[i])
                     float(raw_data[i+1])
                     float(raw_data[i+2])
-                    temp.append([raw_data[i], raw_data[i+1], raw_data[i+2]])
+                    points.append([raw_data[i], raw_data[i+1], raw_data[i+2]])
                     i += 3
                 except:
                     i += 1
-        points = temp
 
-            parts = line.replace('\t', ' ').strip().split()
-            if len(parts) == 4:  # Bỏ STT đầu tiên
-                parts = parts[1:]
-            if len(parts) == 3:
-                try:
-                    float(parts[0]); float(parts[1]); float(parts[2])
-                    points.append(parts)
-                except:
-                    continue
-    
         results = []
-        for point in points:
-            if len(point) == 3:
-                try:
-                    x, y, z = map(float, point)
-                    lat, lon, h = vn2000_to_wgs84_baibao(x, y, z, lon0)
-                    results.append((lat, lon, h))
-                except:
-                    continue
+        for p in points:
+            try:
+                x, y, z = map(float, p)
+                lat, lon, h = vn2000_to_wgs84_baibao(x, y, z, lon0)
+                results.append((lat, lon, h))
+            except:
+                continue
+
         if results:
-            st.success("🎯 Kết quả chuyển đổi:")
-            
             df = pd.DataFrame(results, columns=["Vĩ độ (Lat)", "Kinh độ (Lon)", "Cao độ ellipsoid (H)"])
             st.dataframe(df)
-
             csv = df.to_csv(index=False).encode('utf-8')
             st.download_button("📥 Tải kết quả CSV", data=csv, file_name="VN2000_to_WGS84.csv", mime="text/csv")
-    
         else:
             st.warning("⚠️ Không có dữ liệu hợp lệ.")
 
@@ -89,59 +71,40 @@ with tab2:
     ], index=10, key="lon0_wgs84")
 
     if st.button("🔁 Chuyển sang VN2000"):
-        
-        
         raw_data = coords_input.replace('\t', ' ').replace('\n', ' ').split()
-        temp = []
+        points = []
         i = 0
         while i < len(raw_data):
             try:
-                # Thử lấy 4 phần tử, nếu phần đầu không phải số thực thì bỏ
                 float(raw_data[i+1])
                 float(raw_data[i+2])
                 float(raw_data[i+3])
-                temp.append([raw_data[i+1], raw_data[i+2], raw_data[i+3]])
+                points.append([raw_data[i+1], raw_data[i+2], raw_data[i+3]])
                 i += 4
             except:
                 try:
-                    # Nếu 3 phần tử liền nhau là tọa độ thì giữ
                     float(raw_data[i])
                     float(raw_data[i+1])
                     float(raw_data[i+2])
-                    temp.append([raw_data[i], raw_data[i+1], raw_data[i+2]])
+                    points.append([raw_data[i], raw_data[i+1], raw_data[i+2]])
                     i += 3
                 except:
                     i += 1
-        points = temp
 
-            parts = line.replace('\t', ' ').strip().split()
-            if len(parts) == 4:  # Bỏ STT đầu tiên
-                parts = parts[1:]
-            if len(parts) == 3:
-                try:
-                    float(parts[0]); float(parts[1]); float(parts[2])
-                    points.append(parts)
-                except:
-                    continue
-    
         results = []
-        for point in points:
-            if len(point) == 3:
-                try:
-                    lat, lon, h = map(float, point)
-                    x, y, h_vn = wgs84_to_vn2000_baibao(lat, lon, h, lon0)
-                    results.append((x, y, h_vn))
-                except:
-                    continue
+        for p in points:
+            try:
+                lat, lon, h = map(float, p)
+                x, y, h_vn = wgs84_to_vn2000_baibao(lat, lon, h, lon0)
+                results.append((x, y, h_vn))
+            except:
+                continue
+
         if results:
-            st.success("🎯 Kết quả chuyển đổi:")
-            
             df = pd.DataFrame(results, columns=["Hoành độ x", "Tung độ y", "Cao độ chuẩn (h)"])
             st.dataframe(df)
-
             csv = df.to_csv(index=False).encode('utf-8')
             st.download_button("📥 Tải kết quả CSV", data=csv, file_name="WGS84_to_VN2000.csv", mime="text/csv")
-    
         else:
             st.warning("⚠️ Không có dữ liệu hợp lệ.")
 
