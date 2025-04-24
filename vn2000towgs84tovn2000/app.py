@@ -63,7 +63,31 @@ with tab1:
             st.dataframe(df)
 
             # Hiển thị tất cả điểm trên bản đồ
-            st.map(df.rename(columns={"Vĩ độ (Lat)": "latitude", "Kinh độ (Lon)": "longitude"}))
+            
+            # Hiển thị bản đồ tất cả điểm (dùng pydeck với chấm nhỏ)
+            import pydeck as pdk
+            st.pydeck_chart(pdk.Deck(
+                map_style="mapbox://styles/mapbox/streets-v12",
+                initial_view_state=pdk.ViewState(
+                    latitude=df["Vĩ độ (Lat)"].mean(),
+                    longitude=df["Kinh độ (Lon)"].mean(),
+                    zoom=14,
+                    pitch=0,
+                ),
+                layers=[
+                    pdk.Layer(
+                        "ScatterplotLayer",
+                        data=df,
+                        get_position="[Kinh độ (Lon), Vĩ độ (Lat)]",
+                        get_color="[255, 0, 0, 160]",
+                        get_radius=1,
+                        radius_min_pixels=1,
+                        radius_max_pixels=2,
+                        pickable=False
+                    )
+                ],
+            ))
+
     
 
             # Chọn một điểm để xem trên bản đồ
@@ -121,7 +145,31 @@ with tab2:
             st.dataframe(df)
 
             # Hiển thị tất cả điểm trên bản đồ
-            st.map(df.rename(columns={"Vĩ độ (Lat)": "latitude", "Kinh độ (Lon)": "longitude"}))
+            
+            # Hiển thị bản đồ tất cả điểm (dùng pydeck với chấm nhỏ)
+            import pydeck as pdk
+            st.pydeck_chart(pdk.Deck(
+                map_style="mapbox://styles/mapbox/streets-v12",
+                initial_view_state=pdk.ViewState(
+                    latitude=df["Vĩ độ (Lat)"].mean(),
+                    longitude=df["Kinh độ (Lon)"].mean(),
+                    zoom=14,
+                    pitch=0,
+                ),
+                layers=[
+                    pdk.Layer(
+                        "ScatterplotLayer",
+                        data=df,
+                        get_position="[Kinh độ (Lon), Vĩ độ (Lat)]",
+                        get_color="[255, 0, 0, 160]",
+                        get_radius=1,
+                        radius_min_pixels=1,
+                        radius_max_pixels=2,
+                        pickable=False
+                    )
+                ],
+            ))
+
     
 
             # Chọn một điểm để xem trên bản đồ
