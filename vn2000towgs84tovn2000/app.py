@@ -67,6 +67,9 @@ with tab1:
             
             # Hiển thị bản đồ tất cả điểm (dùng pydeck với chấm nhỏ)
             
+    
+if "vn2000_df" in st.session_state:
+    df = st.session_state.vn2000_df
     if not df.empty and "Vĩ độ (Lat)" in df.columns and "Kinh độ (Lon)" in df.columns:
         deck = pdk.Deck(
             map_style="mapbox://styles/mapbox/streets-v12",
@@ -90,5 +93,10 @@ with tab1:
             ],
         )
         st.pydeck_chart(deck)
+    else:
+        st.warning("⚠️ Không có dữ liệu để hiển thị bản đồ.")
+else:
+    st.warning("⚠️ Chưa có dữ liệu để hiển thị bản đồ.")
+
     else:
         st.warning("⚠️ Không có dữ liệu để hiển thị bản đồ.")
