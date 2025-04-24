@@ -23,7 +23,11 @@ with tab1:
         107.5, 108.0, 108.25, 108.5, 109.0, 109.25, 109.5
     ], index=10, key="lon0_vn2000")
 
+    
     if st.button("🔁 Chuyển sang WGS84"):
+        st.session_state.vn2000_results = st.session_state.get("vn2000_results", [])
+        st.session_state.vn2000_df = None
+    
         raw_data = coords_input.replace('\t', ' ').replace('\n', ' ').split()
         points = []
         i = 0
@@ -44,7 +48,7 @@ with tab1:
                 except:
                     i += 1
 
-        results = []
+        results = st.session_state.get("vn2000_results", [])
         for p in points:
             try:
                 x, y, z = map(float, p)
@@ -55,11 +59,16 @@ with tab1:
 
         if results:
             df = pd.DataFrame(results, columns=["Vĩ độ (Lat)", "Kinh độ (Lon)", "Cao độ ellipsoid (H)"])
+            st.session_state.vn2000_df = df
             st.dataframe(df)
 
+            # Hiển thị tất cả điểm trên bản đồ
+            st.map(df.rename(columns={"Vĩ độ (Lat)": "latitude", "Kinh độ (Lon)": "longitude"}))
+    
+
             # Chọn một điểm để xem trên bản đồ
-            selected_index = st.selectbox("🗺️ Chọn điểm để xem trên Google Maps", range(len(df)), format_func=lambda i: f"Điểm {i+1}")
-            selected_point = df.iloc[selected_index]
+            selected_index = st.selectbox("🗺️ Chọn điểm để xem trên Google Maps", range(len(st.session_state.vn2000_df)) if st.session_state.get("vn2000_df") is not None else [], format_func=lambda i: f"Điểm {i+1}"), range(len(df)), format_func=lambda i: f"Điểm {i+1}")
+            selected_point = st.session_state.vn2000_df.iloc[selected_index] if st.session_state.get("vn2000_df") is not None else None
             map_url = f"https://www.google.com/maps/@{selected_point['Vĩ độ (Lat)']},{selected_point['Kinh độ (Lon)']},18z"
             st.markdown(f"[🌐 Mở Google Maps tại điểm này]({map_url})", unsafe_allow_html=True)
     
@@ -98,7 +107,7 @@ with tab2:
                 except:
                     i += 1
 
-        results = []
+        results = st.session_state.get("vn2000_results", [])
         for p in points:
             try:
                 lat, lon, h = map(float, p)
@@ -111,9 +120,13 @@ with tab2:
             df = pd.DataFrame(results, columns=["Hoành độ x", "Tung độ y", "Cao độ chuẩn (h)"])
             st.dataframe(df)
 
+            # Hiển thị tất cả điểm trên bản đồ
+            st.map(df.rename(columns={"Vĩ độ (Lat)": "latitude", "Kinh độ (Lon)": "longitude"}))
+    
+
             # Chọn một điểm để xem trên bản đồ
-            selected_index = st.selectbox("🗺️ Chọn điểm để xem trên Google Maps", range(len(df)), format_func=lambda i: f"Điểm {i+1}")
-            selected_point = df.iloc[selected_index]
+            selected_index = st.selectbox("🗺️ Chọn điểm để xem trên Google Maps", range(len(st.session_state.vn2000_df)) if st.session_state.get("vn2000_df") is not None else [], format_func=lambda i: f"Điểm {i+1}"), range(len(df)), format_func=lambda i: f"Điểm {i+1}")
+            selected_point = st.session_state.vn2000_df.iloc[selected_index] if st.session_state.get("vn2000_df") is not None else None
             map_url = f"https://www.google.com/maps/@{selected_point['Vĩ độ (Lat)']},{selected_point['Kinh độ (Lon)']},18z"
             st.markdown(f"[🌐 Mở Google Maps tại điểm này]({map_url})", unsafe_allow_html=True)
     
