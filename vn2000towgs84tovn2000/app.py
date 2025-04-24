@@ -66,7 +66,6 @@ with tab1:
             
             
             # Hiển thị bản đồ tất cả điểm (dùng pydeck với chấm nhỏ)
-            import pydeck as pdk
             if not df.empty and "Vĩ độ (Lat)" in df.columns and "Kinh độ (Lon)" in df.columns:
                 deck = pdk.Deck(
                     map_style="mapbox://styles/mapbox/streets-v12",
@@ -93,11 +92,9 @@ with tab1:
             else:
                 st.warning("⚠️ Không có dữ liệu để hiển thị bản đồ.")
 
-            import pydeck as pdk
             
             
             # Hiển thị bản đồ tất cả điểm (dùng pydeck với chấm nhỏ)
-            import pydeck as pdk
             if not df.empty and "Vĩ độ (Lat)" in df.columns and "Kinh độ (Lon)" in df.columns:
                 deck = pdk.Deck(
                     map_style="mapbox://styles/mapbox/streets-v12",
@@ -124,12 +121,10 @@ with tab1:
             else:
                 st.warning("⚠️ Không có dữ liệu để hiển thị bản đồ.")
 
-            import pydeck as pdk
             if not df.empty and "Vĩ độ (Lat)" in df.columns and "Kinh độ (Lon)" in df.columns:
                 
             
             # Hiển thị bản đồ tất cả điểm (dùng pydeck với chấm nhỏ)
-            import pydeck as pdk
             if not df.empty and "Vĩ độ (Lat)" in df.columns and "Kinh độ (Lon)" in df.columns:
                 deck = pdk.Deck(
                     map_style="mapbox://styles/mapbox/streets-v12",
@@ -156,7 +151,6 @@ with tab1:
             else:
                 st.warning("⚠️ Không có dữ liệu để hiển thị bản đồ.")
 
-            import pydeck as pdk
             if not df.empty and "Vĩ độ (Lat)" in df.columns and "Kinh độ (Lon)" in df.columns:
                 st.pydeck_chart(pdk.Deck(
                     map_style="mapbox://styles/mapbox/streets-v12",
@@ -184,12 +178,3 @@ with tab1:
     
 
 # Bản đồ đã xử lý an toàn
-# Ghi chú cuối trang
-st.markdown("---")
-st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: "
-            "**CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI CÓ ĐỊNH VỊ TÂM CHỤP CHÍNH XÁC**  \n"
-            "Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  \n"
-            "¹ Trường Đại học Mỏ - Địa chất  \n"
-            "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  \n"
-            "_Trình bày tại: HỘI NGHỊ KHOA HỌC QUỐC GIA VỀ CÔNG NGHỆ ĐỊA KHÔNG GIAN TRONG KHOA HỌC TRÁI ĐẤT VÀ MÔI TRƯỜNG_")
-
