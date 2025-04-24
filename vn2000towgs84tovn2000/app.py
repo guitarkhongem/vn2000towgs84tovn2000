@@ -10,18 +10,36 @@ import folium
 from streamlit_folium import st_folium
 
 def parse_coordinates(text, group=3):
-    """Chia token space/tab/newline thành các nhóm float size=group."""
-    tokens = text.replace('\t',' ').replace('\n',' ').split()
-    coords, i = [], 0
-    while i + group <= len(tokens):
-        chunk = tokens[i:i+group]
-        try:
-            vals = list(map(float, chunk))
-            coords.append(vals)
-            i += group
-        except ValueError:
-            i += 1
-    return coords
+    """
+    Chia từng dòng, thu được tối thiểu `group` số float.
+    Nếu dòng có group+1 số và token đầu không có dấu '.', coi đó là STT và bỏ qua.
+    Trả về list các list float kích thước = group.
+    """
+    rows = []
+    for line in text.splitlines():
+        line = line.strip().replace('\t', ' ').replace(',', '.')
+        if not line:
+            continue
+        tokens = line.split()
+        # Lọc ra các token có thể float
+        nums = []
+        for t in tokens:
+            try:
+                nums.append(t)
+                float(t)
+            except ValueError:
+                pass
+        if len(nums) >= group:
+            # nếu có đúng group+1 token và token đầu không chứa '.', coi là STT
+            if len(nums) >= group+1 and '.' not in nums[0]:
+                vals = nums[1 : 1+group]
+            else:
+                vals = nums[0 : group]
+            try:
+                rows.append([float(v) for v in vals])
+            except ValueError:
+                pass
+    return rows
 
 def render_map(df):
     """Hiển thị các điểm lên bản đồ vệ tinh Folium."""
@@ -102,6 +120,12 @@ with tab2:
 if "df" in st.session_state:
     render_map(st.session_state.df)
 
+st.markdown("---")
+st.markdown(
+    "Tác giả: Trần Trường Sinh \n"
+    "Số điện thoại: 0917.750.555  \n"
+
+)
 st.markdown("---")
 st.markdown(
     "🔍 **Nguồn công thức**: Bài báo khoa học: **CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI...**  \n"
