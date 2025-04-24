@@ -93,10 +93,7 @@ if "vn2000_df" in st.session_state:
             ],
         )
         st.pydeck_chart(deck)
-    else:
         st.warning("⚠️ Không có dữ liệu để hiển thị bản đồ.")
-else:
     st.warning("⚠️ Chưa có dữ liệu để hiển thị bản đồ.")
 
-    else:
         st.warning("⚠️ Không có dữ liệu để hiển thị bản đồ.")
