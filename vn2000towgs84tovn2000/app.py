@@ -3,7 +3,12 @@ import streamlit as st
 from functions import vn2000_to_wgs84_baibao, wgs84_to_vn2000_baibao
 
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="centered")
-st.title("📍 Chuyển đổi tọa độ VN2000 ⇄ WGS84")
+col_logo, col_title = st.columns([1, 5])
+with col_logo:
+    st.image("logo.jpg", width=90)
+with col_title:
+    st.markdown("<h5 style='margin-bottom:0;'>BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA</h5>", unsafe_allow_html=True)
+    st.markdown("<h6 style='color:gray;'>VN2000 ⇄ WGS84</h6>", unsafe_allow_html=True)
 
 tab1, tab2 = st.tabs(["➡️ VN2000 → WGS84", "⬅️ WGS84 → VN2000"])
 
