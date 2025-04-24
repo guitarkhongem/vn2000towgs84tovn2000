@@ -6,7 +6,7 @@ from wgs84_to_vn2000_baibao import wgs84_to_vn2000_baibao
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="centered")
 
 st.title("VN2000 ⇄ WGS84")
-st.markdown("### Công cụ chuyển đổi tọa độ dựa trên thuật toán bài báo khoa học")
+st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA")
 
 tab1, tab2 = st.tabs(["➡️ VN2000 → WGS84", "⬅️ WGS84 → VN2000"])
 
@@ -14,10 +14,10 @@ with tab1:
     st.subheader("VN2000 ➜ WGS84")
     col1, col2 = st.columns(2)
     with col1:
-        x = st.number_input("🧮 Hoành độ x (m)", value=1855759.3584, format="%.10f", key="x_vn")
-        z = st.number_input("📏 Cao độ (m)", value=846.1115, format="%.4f", key="z_vn")
+        x = st.number_input("🧮 X (m)", value=1855759.3584, format="%.10f", key="x_vn")
+        z = st.number_input("📏 Y (m)", value=846.1115, format="%.4f", key="z_vn")
     with col2:
-        y = st.number_input("🧮 Tung độ y (m)", value=546151.8072, format="%.10f", key="y_vn")
+        y = st.number_input("🧮 Z y (m)", value=546151.8072, format="%.10f", key="y_vn")
         lon0 = st.number_input("🌐 Kinh tuyến trục (°)", value=106.25, key="lon0_vn")
 
     if st.button("🔄 Chuyển sang WGS84", key="btn1"):
