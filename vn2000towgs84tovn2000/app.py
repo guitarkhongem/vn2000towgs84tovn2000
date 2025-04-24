@@ -1,6 +1,6 @@
+import pandas as pd
 
 import streamlit as st
-import pandas as pd
 from functions import vn2000_to_wgs84_baibao, wgs84_to_vn2000_baibao
 
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="centered")
@@ -23,8 +23,20 @@ with tab1:
     ], index=10, key="lon0_vn2000")
 
     if st.button("🔁 Chuyển sang WGS84"):
-        raw_data = coords_input.replace('\t', ' ').replace('\n', ' ').split()
-        points = [raw_data[i:i+3] for i in range(0, len(raw_data), 3)]
+        
+        lines = coords_input.strip().split('\n')
+        points = []
+        for line in lines:
+            parts = line.replace('\t', ' ').strip().split()
+            if len(parts) == 4:  # Bỏ STT đầu tiên
+                parts = parts[1:]
+            if len(parts) == 3:
+                try:
+                    float(parts[0]); float(parts[1]); float(parts[2])
+                    points.append(parts)
+                except:
+                    continue
+    
         results = []
         for point in points:
             if len(point) == 3:
@@ -56,8 +68,20 @@ with tab2:
     ], index=10, key="lon0_wgs84")
 
     if st.button("🔁 Chuyển sang VN2000"):
-        raw_data = coords_input.replace('\t', ' ').replace('\n', ' ').split()
-        points = [raw_data[i:i+3] for i in range(0, len(raw_data), 3)]
+        
+        lines = coords_input.strip().split('\n')
+        points = []
+        for line in lines:
+            parts = line.replace('\t', ' ').strip().split()
+            if len(parts) == 4:  # Bỏ STT đầu tiên
+                parts = parts[1:]
+            if len(parts) == 3:
+                try:
+                    float(parts[0]); float(parts[1]); float(parts[2])
+                    points.append(parts)
+                except:
+                    continue
+    
         results = []
         for point in points:
             if len(point) == 3:
