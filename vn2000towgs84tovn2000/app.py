@@ -67,7 +67,7 @@ with tab1:
     
 
             # Chọn một điểm để xem trên bản đồ
-            selected_index = st.selectbox("🗺️ Chọn điểm để xem trên Google Maps", range(len(st.session_state.vn2000_df)) if st.session_state.get("vn2000_df") is not None else [], format_func=lambda i: f"Điểm {i+1}"), range(len(df)), format_func=lambda i: f"Điểm {i+1}")
+            selected_index = st.selectbox("🗺️ Chọn điểm để xem trên Google Maps", range(len(st.session_state.vn2000_df)) if st.session_state.get("vn2000_df") is not None else [], format_func=lambda i: f"Điểm {i+1}")
             selected_point = st.session_state.vn2000_df.iloc[selected_index] if st.session_state.get("vn2000_df") is not None else None
             map_url = f"https://www.google.com/maps/@{selected_point['Vĩ độ (Lat)']},{selected_point['Kinh độ (Lon)']},18z"
             st.markdown(f"[🌐 Mở Google Maps tại điểm này]({map_url})", unsafe_allow_html=True)
@@ -125,7 +125,7 @@ with tab2:
     
 
             # Chọn một điểm để xem trên bản đồ
-            selected_index = st.selectbox("🗺️ Chọn điểm để xem trên Google Maps", range(len(st.session_state.vn2000_df)) if st.session_state.get("vn2000_df") is not None else [], format_func=lambda i: f"Điểm {i+1}"), range(len(df)), format_func=lambda i: f"Điểm {i+1}")
+            selected_index = st.selectbox("🗺️ Chọn điểm để xem trên Google Maps", range(len(st.session_state.vn2000_df)) if st.session_state.get("vn2000_df") is not None else [], format_func=lambda i: f"Điểm {i+1}")
             selected_point = st.session_state.vn2000_df.iloc[selected_index] if st.session_state.get("vn2000_df") is not None else None
             map_url = f"https://www.google.com/maps/@{selected_point['Vĩ độ (Lat)']},{selected_point['Kinh độ (Lon)']},18z"
             st.markdown(f"[🌐 Mở Google Maps tại điểm này]({map_url})", unsafe_allow_html=True)
@@ -135,11 +135,13 @@ with tab2:
         else:
             st.warning("⚠️ Không có dữ liệu hợp lệ.")
 
-# Ghi chú cuối trang
 st.markdown("---")
-st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: "
-            "**CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI CÓ ĐỊNH VỊ TÂM CHỤP CHÍNH XÁC**  \n"
-            "Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  \n"
-            "¹ Trường Đại học Mỏ - Địa chất  \n"
-            "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  \n"
+st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: **CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI CÓ ĐỊNH VỊ TÂM CHỤP CHÍNH XÁC**  
+"
+            "Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  
+"
+            "¹ Trường Đại học Mỏ - Địa chất  
+"
+            "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  
+"
             "_Trình bày tại: HỘI NGHỊ KHOA HỌC QUỐC GIA VỀ CÔNG NGHỆ ĐỊA KHÔNG GIAN TRONG KHOA HỌC TRÁI ĐẤT VÀ MÔI TRƯỜNG_")
