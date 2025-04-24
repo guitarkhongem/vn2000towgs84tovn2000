@@ -64,14 +64,98 @@ with tab1:
 
             # Hiển thị tất cả điểm trên bản đồ
             
-            # Hiển thị bản đồ tất cả điểm (dùng pydeck với chấm nhỏ)
-            import pydeck as pdk
             
             # Hiển thị bản đồ tất cả điểm (dùng pydeck với chấm nhỏ)
             import pydeck as pdk
             if not df.empty and "Vĩ độ (Lat)" in df.columns and "Kinh độ (Lon)" in df.columns:
-                
+                deck = pdk.Deck(
+                    map_style="mapbox://styles/mapbox/streets-v12",
+                    initial_view_state=pdk.ViewState(
+                        latitude=df["Vĩ độ (Lat)"].mean(),
+                        longitude=df["Kinh độ (Lon)"].mean(),
+                        zoom=14,
+                        pitch=0,
+                    ),
+                    layers=[
+                        pdk.Layer(
+                            "ScatterplotLayer",
+                            data=df,
+                            get_position="[Kinh độ (Lon), Vĩ độ (Lat)]",
+                            get_color="[255, 0, 0, 160]",
+                            get_radius=1,
+                            radius_min_pixels=1,
+                            radius_max_pixels=2,
+                            pickable=False
+                        )
+                    ],
+                )
+                st.pydeck_chart(deck)
+            else:
+                st.warning("⚠️ Không có dữ liệu để hiển thị bản đồ.")
+
+            import pydeck as pdk
+            
+            
             # Hiển thị bản đồ tất cả điểm (dùng pydeck với chấm nhỏ)
+            import pydeck as pdk
+            if not df.empty and "Vĩ độ (Lat)" in df.columns and "Kinh độ (Lon)" in df.columns:
+                deck = pdk.Deck(
+                    map_style="mapbox://styles/mapbox/streets-v12",
+                    initial_view_state=pdk.ViewState(
+                        latitude=df["Vĩ độ (Lat)"].mean(),
+                        longitude=df["Kinh độ (Lon)"].mean(),
+                        zoom=14,
+                        pitch=0,
+                    ),
+                    layers=[
+                        pdk.Layer(
+                            "ScatterplotLayer",
+                            data=df,
+                            get_position="[Kinh độ (Lon), Vĩ độ (Lat)]",
+                            get_color="[255, 0, 0, 160]",
+                            get_radius=1,
+                            radius_min_pixels=1,
+                            radius_max_pixels=2,
+                            pickable=False
+                        )
+                    ],
+                )
+                st.pydeck_chart(deck)
+            else:
+                st.warning("⚠️ Không có dữ liệu để hiển thị bản đồ.")
+
+            import pydeck as pdk
+            if not df.empty and "Vĩ độ (Lat)" in df.columns and "Kinh độ (Lon)" in df.columns:
+                
+            
+            # Hiển thị bản đồ tất cả điểm (dùng pydeck với chấm nhỏ)
+            import pydeck as pdk
+            if not df.empty and "Vĩ độ (Lat)" in df.columns and "Kinh độ (Lon)" in df.columns:
+                deck = pdk.Deck(
+                    map_style="mapbox://styles/mapbox/streets-v12",
+                    initial_view_state=pdk.ViewState(
+                        latitude=df["Vĩ độ (Lat)"].mean(),
+                        longitude=df["Kinh độ (Lon)"].mean(),
+                        zoom=14,
+                        pitch=0,
+                    ),
+                    layers=[
+                        pdk.Layer(
+                            "ScatterplotLayer",
+                            data=df,
+                            get_position="[Kinh độ (Lon), Vĩ độ (Lat)]",
+                            get_color="[255, 0, 0, 160]",
+                            get_radius=1,
+                            radius_min_pixels=1,
+                            radius_max_pixels=2,
+                            pickable=False
+                        )
+                    ],
+                )
+                st.pydeck_chart(deck)
+            else:
+                st.warning("⚠️ Không có dữ liệu để hiển thị bản đồ.")
+
             import pydeck as pdk
             if not df.empty and "Vĩ độ (Lat)" in df.columns and "Kinh độ (Lon)" in df.columns:
                 st.pydeck_chart(pdk.Deck(
