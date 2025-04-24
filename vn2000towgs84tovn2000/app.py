@@ -17,39 +17,32 @@ import folium
 from streamlit_folium import st_folium
 
 import re
-
 def parse_coordinates(text, group=3):
     """
-    Chia mọi token space/tab/newline thành nhóm `group` float.
-    Nếu token đầu của nhóm là số nguyên (STT), tự bỏ qua.
-    Trả về list các list float kích thước = group.
+    Chia token space/tab/newline thành nhóm `group` float.
+    Bỏ qua bất cứ token nào chứa ký tự chữ (STT dạng A1, PT01…),
+    rồi gom tiếp các token số còn lại thành từng bộ [X, Y, Z].
     """
-    # Tách mọi dấu space/tab/newline
+    # Tách mọi khoảng trắng (space, tab, newline)
     tokens = re.split(r'\s+', text.strip())
     coords = []
     i = 0
-    while i < len(tokens):
-        # Nếu còn ít hơn group token, dừng
-        if len(tokens) - i < group:
-            break
 
-        # Kiểm tra STT: token[i] là số nguyên (no dot) và còn đủ group+1 token
-        if (re.fullmatch(r'\d+', tokens[i]) 
-            and len(tokens) - i >= group + 1):
-            # Bỏ qua STT
-            chunk = tokens[i+1 : i+1+group]
-            i += group + 1
-        else:
-            chunk = tokens[i : i+group]
-            i += group
-
-        # Thử chuyển chunk thành float
-        try:
-            vals = [float(x) for x in chunk]
-            coords.append(vals)
-        except ValueError:
-            # Nếu không phải float (vd: STT lẫn trong chunk), bỏ qua và tiếp tục
+    while i + group <= len(tokens):
+        # Nếu token chứa ký tự chữ, coi là STT, bỏ qua
+        if re.search(r'[A-Za-z]', tokens[i]):
+            i += 1
             continue
+
+        # Thử lấy đúng nhóm group
+        chunk = tokens[i : i + group]
+        try:
+            vals = [float(x.replace(',', '.')) for x in chunk]
+            coords.append(vals)
+            i += group
+        except ValueError:
+            # Nếu có bất kỳ phần tử không float được, bỏ qua token đầu và thử lại
+            i += 1
 
     return coords
 
