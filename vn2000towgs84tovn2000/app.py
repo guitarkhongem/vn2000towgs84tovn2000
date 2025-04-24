@@ -5,7 +5,7 @@ from wgs84_to_vn2000_baibao import wgs84_to_vn2000_baibao
 
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="centered")
 
-st.title("📍 Chuyển đổi tọa độ VN2000 ⇄ WGS84")
+st.title("VN2000 ⇄ WGS84")
 st.markdown("### Công cụ chuyển đổi tọa độ dựa trên thuật toán bài báo khoa học")
 
 tab1, tab2 = st.tabs(["➡️ VN2000 → WGS84", "⬅️ WGS84 → VN2000"])
@@ -44,14 +44,11 @@ with tab2:
         st.markdown(f"**y:** `{y:.4f}` m")
         st.markdown(f"**Cao độ chuẩn (h):** `{h_vn:.4f}` m")
 
+# Ghi chú cuối trang
 st.markdown("---")
 st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: "
-            "**CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI CÓ ĐỊNH VỊ TÂM CHỤP CHÍNH XÁC**  
-"
-            "Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  
-"
-            "¹ Trường Đại học Mỏ - Địa chất  
-"
-            "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  
-"
+            "**CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI CÓ ĐỊNH VỊ TÂM CHỤP CHÍNH XÁC**  \n"
+            "Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  \n"
+            "¹ Trường Đại học Mỏ - Địa chất  \n"
+            "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  \n"
             "_Trình bày tại: HỘI NGHỊ KHOA HỌC QUỐC GIA VỀ CÔNG NGHỆ ĐỊA KHÔNG GIAN TRONG KHOA HỌC TRÁI ĐẤT VÀ MÔI TRƯỜNG_")
