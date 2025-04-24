@@ -11,35 +11,25 @@ from streamlit_folium import st_folium
 
 def parse_coordinates(text, group=3):
     """
-    Chia từng dòng, thu được tối thiểu `group` số float.
-    Nếu dòng có group+1 số và token đầu không có dấu '.', coi đó là STT và bỏ qua.
-    Trả về list các list float kích thước = group.
+    Chia token space/tab/newline thành groups of `group` float.
+    Hỗ trợ cả nhập STT đầu dòng sẽ bị bỏ qua.
     """
-    rows = []
-    for line in text.splitlines():
-        line = line.strip().replace('\t', ' ').replace(',', '.')
-        if not line:
-            continue
-        tokens = line.split()
-        # Lọc ra các token có thể float
-        nums = []
-        for t in tokens:
-            try:
-                nums.append(t)
-                float(t)
-            except ValueError:
-                pass
-        if len(nums) >= group:
-            # nếu có đúng group+1 token và token đầu không chứa '.', coi là STT
-            if len(nums) >= group+1 and '.' not in nums[0]:
-                vals = nums[1 : 1+group]
-            else:
-                vals = nums[0 : group]
-            try:
-                rows.append([float(v) for v in vals])
-            except ValueError:
-                pass
-    return rows
+    # Thay thế tab và newline thành khoảng trắng rồi tách tokens
+    tokens = text.replace('\t', ' ').replace('\n', ' ').split()
+    coords = []
+    i = 0
+    # Lặp qua tokens theo từng nhóm `group`
+    while i + group <= len(tokens):
+        chunk = tokens[i:i+group]
+        try:
+            # Nếu cả chunk đều có thể float được => thêm vào kết quả
+            vals = list(map(float, chunk))
+            coords.append(vals)
+            i += group
+        except ValueError:
+            # Nếu chunk không hợp lệ, bỏ qua token đầu và thử lại
+            i += 1
+    return coords
 
 def render_map(df):
     """Hiển thị các điểm lên bản đồ vệ tinh Folium."""
@@ -122,9 +112,8 @@ if "df" in st.session_state:
 
 st.markdown("---")
 st.markdown(
-    "Tác giả: Trần Trường Sinh \n"
+    "Tác giả: Trần Trường Sinh  \n"
     "Số điện thoại: 0917.750.555  \n"
-
 )
 st.markdown("---")
 st.markdown(
