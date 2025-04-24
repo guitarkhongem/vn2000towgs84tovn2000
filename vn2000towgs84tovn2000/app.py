@@ -17,34 +17,36 @@ import folium
 from streamlit_folium import st_folium
 
 import re
+
 def parse_coordinates(text, group=3):
     """
     Chia token space/tab/newline thành nhóm `group` float.
-    Bỏ qua bất cứ token nào chứa ký tự chữ (STT dạng A1, PT01…),
-    rồi gom tiếp các token số còn lại thành từng bộ [X, Y, Z].
+    Bỏ qua token STT nếu
+     - chứa ký tự chữ (A10, PT01…)
+     - hoặc là số nguyên không chứa dấu '.' khi nó đứng trước đủ group+1 token (ví dụ '10' trước X Y Z)
     """
-    # Tách mọi khoảng trắng (space, tab, newline)
     tokens = re.split(r'\s+', text.strip())
     coords = []
     i = 0
-
     while i + group <= len(tokens):
-        # Nếu token chứa ký tự chữ, coi là STT, bỏ qua
-        if re.search(r'[A-Za-z]', tokens[i]):
+        t0 = tokens[i]
+        # Bỏ STT chứa chữ hoặc số nguyên mà kế tiếp có đủ group giá trị
+        if re.search(r'[A-Za-z]', t0) or ('.' not in t0 and re.fullmatch(r'\d+', t0) and len(tokens) - i >= group+1):
             i += 1
             continue
 
-        # Thử lấy đúng nhóm group
-        chunk = tokens[i : i + group]
+        # Lấy nhóm group token
+        chunk = tokens[i : i+group]
         try:
             vals = [float(x.replace(',', '.')) for x in chunk]
             coords.append(vals)
             i += group
         except ValueError:
-            # Nếu có bất kỳ phần tử không float được, bỏ qua token đầu và thử lại
+            # chunk chưa đúng, bỏ qua token đầu và thử lại
             i += 1
 
     return coords
+
 
 def render_map(df):
     """Hiển thị các điểm lên bản đồ vệ tinh Folium."""
