@@ -35,8 +35,13 @@ with tab1:
                     continue
         if results:
             st.success("🎯 Kết quả chuyển đổi:")
-            for idx, (lat, lon, h) in enumerate(results):
-                st.markdown(f"**Điểm {idx+1}:** Lat: `{lat:.8f}` | Lon: `{lon:.8f}` | H: `{h:.3f}` m")
+            
+            df = pd.DataFrame(results, columns=["Vĩ độ (Lat)", "Kinh độ (Lon)", "Cao độ ellipsoid (H)"])
+            st.dataframe(df)
+
+            csv = df.to_csv(index=False).encode('utf-8')
+            st.download_button("📥 Tải kết quả CSV", data=csv, file_name="VN2000_to_WGS84.csv", mime="text/csv")
+    
         else:
             st.warning("⚠️ Không có dữ liệu hợp lệ.")
 
@@ -63,8 +68,13 @@ with tab2:
                     continue
         if results:
             st.success("🎯 Kết quả chuyển đổi:")
-            for idx, (x, y, h_vn) in enumerate(results):
-                st.markdown(f"**Điểm {idx+1}:** x: `{x:.4f}` | y: `{y:.4f}` | h: `{h_vn:.4f}` m")
+            
+            df = pd.DataFrame(results, columns=["Hoành độ x", "Tung độ y", "Cao độ chuẩn (h)"])
+            st.dataframe(df)
+
+            csv = df.to_csv(index=False).encode('utf-8')
+            st.download_button("📥 Tải kết quả CSV", data=csv, file_name="WGS84_to_VN2000.csv", mime="text/csv")
+    
         else:
             st.warning("⚠️ Không có dữ liệu hợp lệ.")
 
