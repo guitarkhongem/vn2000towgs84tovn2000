@@ -1,4 +1,34 @@
 
+def render_map(df):
+    import pydeck as pdk
+    if not df.empty and "Vĩ độ (Lat)" in df.columns and "Kinh độ (Lon)" in df.columns:
+        deck = pdk.Deck(
+            map_style="mapbox://styles/mapbox/streets-v12",
+            initial_view_state=pdk.ViewState(
+                latitude=df["Vĩ độ (Lat)"].mean(),
+                longitude=df["Kinh độ (Lon)"].mean(),
+                zoom=14,
+                pitch=0,
+            ),
+            layers=[
+                pdk.Layer(
+                    "ScatterplotLayer",
+                    data=df,
+                    get_position="[Kinh độ (Lon), Vĩ độ (Lat)]",
+                    get_color="[255, 0, 0, 160]",
+                    get_radius=1,
+                    radius_min_pixels=1,
+                    radius_max_pixels=2,
+                    pickable=False
+                )
+            ],
+        )
+        st.pydeck_chart(deck)
+    else:
+        st.warning("⚠️ Không có dữ liệu để hiển thị bản đồ.")
+
+
+
 import streamlit as st
 import pandas as pd
 from functions import vn2000_to_wgs84_baibao, wgs84_to_vn2000_baibao
@@ -69,35 +99,11 @@ with tab1:
             
     
 
+
 if "vn2000_df" in st.session_state:
     df = st.session_state.vn2000_df
-    if not df.empty and "Vĩ độ (Lat)" in df.columns and "Kinh độ (Lon)" in df.columns:
-        deck = pdk.Deck(
-            map_style="mapbox://styles/mapbox/streets-v12",
-            initial_view_state=pdk.ViewState(
-                latitude=df["Vĩ độ (Lat)"].mean(),
-                longitude=df["Kinh độ (Lon)"].mean(),
-                zoom=14,
-                pitch=0,
-            ),
-            layers=[
-                pdk.Layer(
-                    "ScatterplotLayer",
-                    data=df,
-                    get_position="[Kinh độ (Lon), Vĩ độ (Lat)]",
-                    get_color="[255, 0, 0, 160]",
-                    get_radius=1,
-                    radius_min_pixels=1,
-                    radius_max_pixels=2,
-                    pickable=False
-                )
-            ],
-        )
-        st.pydeck_chart(deck)
-    else:
-        st.warning("⚠️ Không có dữ liệu để hiển thị bản đồ.")
-else:
-    st.warning("⚠️ Chưa có dữ liệu để hiển thị bản đồ.")
+    render_map(df)
+
 
 
         st.warning("⚠️ Không có dữ liệu để hiển thị bản đồ.")
