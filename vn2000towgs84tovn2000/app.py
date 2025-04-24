@@ -5,6 +5,13 @@ import pandas as pd
 import math
 from functions import vn2000_to_wgs84_baibao, wgs84_to_vn2000_baibao
 
+# Hiển thị logo và tên đơn vị ngang hàng
+col_logo, col_title = st.columns([1, 5], gap="small")
+with col_logo:
+    st.image("logo.jpg", width=80)
+with col_title:
+    st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA")
+
 # Thư viện Folium
 import folium
 from streamlit_folium import st_folium
