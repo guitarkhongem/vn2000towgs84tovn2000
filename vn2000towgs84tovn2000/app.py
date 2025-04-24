@@ -41,11 +41,3 @@ with tab2:
         st.markdown(f"**y:** `{y:.4f}` m")
         st.markdown(f"**Cao độ chuẩn (h):** `{h_vn:.4f}` m")
 
-# Ghi chú cuối trang
-st.markdown("---")
-st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: "
-            "**CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI CÓ ĐỊNH VỊ TÂM CHỤP CHÍNH XÁC**  \n"
-            "Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  \n"
-            "¹ Trường Đại học Mỏ - Địa chất  \n"
-            "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  \n"
-            "_Trình bày tại: HỘI NGHỊ KHOA HỌC QUỐC GIA VỀ CÔNG NGHỆ ĐỊA KHÔNG GIAN TRONG KHOA HỌC TRÁI ĐẤT VÀ MÔI TRƯỜNG_"
