@@ -4,34 +4,13 @@ import pandas as pd
 import math
 import re
 import folium
+import analytics
 from streamlit_folium import st_folium
 from functions import vn2000_to_wgs84_baibao, wgs84_to_vn2000_baibao
 
 # Cấu hình trang – dòng này luôn phải ở đầu tiên
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
 
-# Ghi nhận truy cập và lượt thích
-conn = sqlite3.connect("analytics.db", check_same_thread=False)
-c = conn.cursor()
-c.execute("CREATE TABLE IF NOT EXISTS visits (ts TEXT)")
-c.execute("CREATE TABLE IF NOT EXISTS likes (id INTEGER PRIMARY KEY, count INTEGER)")
-c.execute("INSERT OR IGNORE INTO likes (id, count) VALUES (1, 0)")
-conn.commit()
-c.execute("INSERT INTO visits (ts) VALUES (datetime('now','localtime'))")
-conn.commit()
-visit_count = c.execute("SELECT COUNT(*) FROM visits").fetchone()[0]
-like_count = c.execute("SELECT count FROM likes WHERE id=1").fetchone()[0]
-
-# Sidebar thống kê
-st.sidebar.markdown("## 📊 Thống kê sử dụng")
-st.sidebar.markdown(f"- 🔍 **Lượt truy cập:** `{visit_count}`")
-st.sidebar.markdown(f"- 👍 **Lượt thích:** `{like_count}`")
-if st.sidebar.button("👍 Thích ứng dụng này"):
-    like_count += 1
-    c.execute("UPDATE likes SET count = ? WHERE id = 1", (like_count,))
-    conn.commit()
-    st.sidebar.success("💖 Cảm ơn bạn đã thích!")
-    st.sidebar.markdown(f"- 👍 **Lượt thích:** `{like_count}`")
 
 # Header: Logo + Tên
 col1, col2 = st.columns([1, 5], gap="small")
