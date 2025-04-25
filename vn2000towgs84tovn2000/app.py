@@ -8,27 +8,53 @@ import folium
 from streamlit_folium import st_folium
 from functions import vn2000_to_wgs84_baibao, wgs84_to_vn2000_baibao
 
-# Cấu hình trang – luôn phải là dòng đầu tiên
+# Cấu hình phải đặt đầu tiên
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
 
-# CSS: làm nổi chữ trên nền sáng
-def set_custom_style():
-    st.markdown("""
+# CSS chèn background và style nhập trong suốt
+def set_background_and_style():
+    st.markdown(f"""
         <style>
-        html, body, [class*="css"] {
-            color: white;
-        }
-        h1, h2, h3, h4, h5, h6, .stMarkdown, .stTextInput label {
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
-        }
-        textarea, .stTextInput > div > input {
-            background-color: rgba(255, 255, 255, 0.85) !important;
-            color: black !important;
-        }
+        .stApp {{
+            background-image: url("background.png");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }}
+        textarea {{
+            background-color: rgba(255, 255, 255, 0.7) !important;
+        }}
+        .block-container {{
+            padding-top: 1rem;
+        }}
         </style>
     """, unsafe_allow_html=True)
 
-set_custom_style()
+set_background_and_style()
+
+# Kết nối thống kê
+conn = sqlite3.connect("analytics.db", check_same_thread=False)
+c = conn.cursor()
+c.execute("CREATE TABLE IF NOT EXISTS visits (ts TEXT)")
+c.execute("CREATE TABLE IF NOT EXISTS likes (id INTEGER PRIMARY KEY, count INTEGER)")
+c.execute("INSERT OR IGNORE INTO likes (id, count) VALUES (1, 0)")
+conn.commit()
+c.execute("INSERT INTO visits (ts) VALUES (datetime('now','localtime'))")
+conn.commit()
+c.execute("SELECT COUNT(*) FROM visits")
+visit_count = c.fetchone()[0]
+c.execute("SELECT count FROM likes WHERE id=1")
+like_count = c.fetchone()[0]
+
+# Hiển thị sidebar
+st.sidebar.markdown("## 📊 Thống kê sử dụng")
+st.sidebar.markdown(f"- 🔍 **Lượt truy cập:** `{visit_count}`")
+st.sidebar.markdown(f"- 👍 **Lượt thích:** `{like_count}`")
+if st.sidebar.button("👍 Thích ứng dụng này"):
+    like_count += 1
+    c.execute("UPDATE likes SET count = ? WHERE id = 1", (like_count,))
+    conn.commit()
+    st.sidebar.success("💖 Cảm ơn bạn đã thích!")
 
 # Header
 col1, col2 = st.columns([1, 5], gap="small")
@@ -38,7 +64,7 @@ with col2:
     st.title("VN2000 ⇄ WGS84 Converter")
     st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA")
 
-# Hàm parse đầu vào
+# Parse dữ liệu
 def parse_coordinates(text, group=3):
     tokens = re.split(r'\s+', text.strip())
     coords = []
@@ -57,7 +83,7 @@ def parse_coordinates(text, group=3):
             i += 1
     return coords
 
-# Xuất file KML
+# Tạo KML
 def df_to_kml(df):
     if not {"Kinh độ (Lon)", "Vĩ độ (Lat)", "H (m)"}.issubset(df.columns):
         return None
@@ -108,6 +134,7 @@ with tab2:
         else:
             st.warning("⚠️ Không có dữ liệu hợp lệ (cần 3 số mỗi bộ).")
 
+# Hiển thị kết quả
 if "df" in st.session_state:
     df = st.session_state.df
     st.markdown("### 📊 Kết quả chuyển đổi")
@@ -116,7 +143,8 @@ if "df" in st.session_state:
     if {"Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
         kml_str = df_to_kml(df)
         if kml_str:
-            st.download_button("📥 Tải file KML", kml_str, "computed_points.kml", "application/vnd.google-earth.kml+xml")
+            st.markdown("### 📥 Xuất file KML tọa độ tính được (WGS84)")
+            st.download_button("Tải KML", kml_str, "computed_points.kml", "application/vnd.google-earth.kml+xml")
 
         st.markdown("### 🛰️ Bản đồ vệ tinh với các điểm tọa độ")
         center_lat = df["Vĩ độ (Lat)"].mean()
@@ -135,11 +163,10 @@ if "df" in st.session_state:
                 fill=True,
                 fill_opacity=0.8
             ).add_to(m)
-        st_folium(m, width=1280, height=600)
+        st_folium(m, width=1000, height=500)
 
-st.markdown("📌 Tác giả: Trần Trường Sinh  \n📞 Số điện thoại: 0917.750.555")
-st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: **CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI CÓ ĐỊNH VỊ TÂM CHỤP CHÍNH XÁC**  \n"
-            "Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  \n"
-            "¹ Trường Đại học Mỏ - Địa chất  \n"
-            "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  \n"
-            "_Hội nghị Khoa học Quốc gia Về Công nghệ Địa không gian, 2021_")
+# Footer
+st.markdown("---")
+st.markdown("📌 Tác giả: Trần Trường Sinh  
+📞 SĐT: 0917.750.555")
+st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: **CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ...** – Trình bày tại _Hội nghị Quốc gia 2021_")
