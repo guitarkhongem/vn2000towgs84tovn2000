@@ -114,7 +114,7 @@ if "df" in st.session_state:
                 location=(row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]),
                 radius=3, color="red", fill=True, fill_opacity=0.8
             ).add_to(m)
-        st_folium(m, width=1200, height=550)
+        st_folium(m, width="100%", height=550)
 
 # Footer
 st.markdown("📌 Tác giả: Trần Trường Sinh  \n📞 Số điện thoại: 0917.750.555")
