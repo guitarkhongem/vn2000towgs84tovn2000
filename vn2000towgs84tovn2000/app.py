@@ -7,7 +7,7 @@ import folium
 from streamlit_folium import st_folium
 from functions import vn2000_to_wgs84_baibao, wgs84_to_vn2000_baibao
 import analytics
-
+analytics.log_visit()
 # Ghi lượt truy cập (có thể thêm IP nếu lấy được)
 analytics.log_visit()
 
