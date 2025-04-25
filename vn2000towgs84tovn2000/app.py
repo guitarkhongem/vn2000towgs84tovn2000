@@ -21,11 +21,11 @@ def set_background(png_file):
             background-attachment: fixed;
         }}
         .stTextArea textarea {{
-            background-color: rgba(0, 0, 0, 0.25) !important;
+            background-color: white !important !important;
             color: white !important;
         }}
         .stTextInput > div > div > input {{
-            background-color: rgba(0, 0, 0, 0.25) !important;
+            background-color: white !important !important;
             color: white !important;
         }}
         .stButton>button {{
@@ -149,7 +149,7 @@ if "df" in st.session_state:
                 fill=True,
                 fill_opacity=0.8
             ).add_to(m)
-        st_folium(m, width="100%", height=1200)
+        st_folium(m, width="100%", height=1250)
 
 # ==== 7. FOOTER ====
 st.markdown("---")
