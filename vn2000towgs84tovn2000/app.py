@@ -1,5 +1,18 @@
 import streamlit as st
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
+st.markdown("""
+    <style>
+    /* Làm khung nhập trong suốt và mềm mại */
+    textarea {
+        background-color: rgba(0, 0, 0, 0.25) !important;
+        color: white !important;
+        border-radius: 10px !important;
+        border: 1px solid #ccc !important;
+        font-size: 16px !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 import base64
 
 def set_background(png_file):
