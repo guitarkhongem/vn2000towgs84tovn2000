@@ -165,8 +165,9 @@ if "df" in st.session_state:
             ).add_to(m)
         st_folium(m, width=1000, height=500)
 
-# Footer
-st.markdown("---")
-st.markdown("📌 Tác giả: Trần Trường Sinh  
-📞 SĐT: 0917.750.555")
-st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: **CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ...** – Trình bày tại _Hội nghị Quốc gia 2021_")
+st.markdown("📌 Tác giả: Trần Trường Sinh  \n📞 Số điện thoại: 0917.750.555")
+st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: **CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI CÓ ĐỊNH VỊ TÂM CHỤP CHÍNH XÁC**  \n"
+            "Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  \n"
+            "¹ Trường Đại học Mỏ - Địa chất  \n"
+            "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  \n"
+            "_Hội nghị Khoa học Quốc gia Về Công nghệ Địa không gian, 2021_")
