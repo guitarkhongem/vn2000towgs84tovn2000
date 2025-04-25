@@ -1,35 +1,30 @@
 import streamlit as st
+# app.py – Nhúng CSS tuỳ chỉnh để làm đẹp nền và khung nhập
+import streamlit as st
+
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
+
+# 💡 Thêm đoạn CSS nền và giao diện
 st.markdown("""
     <style>
-    /* Làm khung nhập trong suốt và mềm mại */
+    .stApp {
+        background-image: url('background.png');
+        background-size: cover;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
     textarea {
-        background-color: rgba(0, 0, 0, 0.25) !important;
+        background-color: rgba(0, 0, 0, 0.4) !important;
         color: white !important;
-        border-radius: 10px !important;
         border: 1px solid #ccc !important;
-        font-size: 16px !important;
+    }
+    iframe {
+        margin-bottom: -80px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 20px rgba(0,0,0,0.4);
     }
     </style>
 """, unsafe_allow_html=True)
-
-import base64
-
-def set_background(png_file):
-    with open(png_file, "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read()).decode()
-    css = f"""
-    <style>
-    .stApp {{
-        background-image: url("data:image/png;base64,{encoded_string}");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }}
-    </style>
-    """
-    st.markdown(css, unsafe_allow_html=True)
 
 # Gọi hàm và truyền tên file hình nền
 set_background("background.png")
@@ -129,8 +124,8 @@ if "df" in st.session_state:
             st.markdown("### 📥 Xuất file KML tọa độ tính được (WGS84)")
             st.download_button("Tải xuống KML", kml_str, "computed_points.kml", "application/vnd.google-earth.kml+xml")
 
-        st.markdown("### 🛰️ Bản đồ vệ tinh với các điểm tọa độ")
-
+        # Bản đồ vệ tinh với các điểm chuyển đổi
+st.markdown("### 🛰️ Bản đồ vệ tinh với các điểm tọa độ")
 center_lat = df["Vĩ độ (Lat)"].mean()
 center_lon = df["Kinh độ (Lon)"].mean()
 
@@ -144,14 +139,27 @@ m = folium.Map(
 for _, row in df.iterrows():
     folium.CircleMarker(
         location=(row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]),
-        radius=3,
-        color="red",
-        fill=True,
-        fill_opacity=0.8
+        radius=3, color="red", fill=True, fill_opacity=0.8
     ).add_to(m)
 
-# 👉 Full width bản đồ
-st_folium(m, width=None, height=600)
+# ✅ Custom CSS để loại bỏ margin đen
+st.markdown(
+    """
+    <style>
+    .stApp {
+        overflow-x: hidden;
+    }
+    iframe {
+        margin-bottom: -60px;  /* giảm phần đen dư bên dưới */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# ✅ Hiển thị map
+st_folium(m, width="100%", height=550)
+
 
 
 # Footer
