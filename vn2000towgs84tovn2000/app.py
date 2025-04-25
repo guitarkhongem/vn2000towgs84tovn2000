@@ -149,7 +149,7 @@ if "df" in st.session_state:
                 fill=True,
                 fill_opacity=0.8
             ).add_to(m)
-        st_folium(m, width="100%", height="100%")
+        st_folium(m, width="100%", height=1200)
 
 # ==== 7. FOOTER ====
 st.markdown("---")
