@@ -130,20 +130,29 @@ if "df" in st.session_state:
             st.download_button("Tải xuống KML", kml_str, "computed_points.kml", "application/vnd.google-earth.kml+xml")
 
         st.markdown("### 🛰️ Bản đồ vệ tinh với các điểm tọa độ")
-        center_lat = df["Vĩ độ (Lat)"].mean()
-        center_lon = df["Kinh độ (Lon)"].mean()
-        m = folium.Map(
-            location=[center_lat, center_lon],
-            zoom_start=15,
-            tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-            attr="Esri.WorldImagery"
-        )
-        for _, row in df.iterrows():
-            folium.CircleMarker(
-                location=(row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]),
-                radius=3, color="red", fill=True, fill_opacity=0.8
-            ).add_to(m)
-        st_folium(m, width=800, height=500)
+
+center_lat = df["Vĩ độ (Lat)"].mean()
+center_lon = df["Kinh độ (Lon)"].mean()
+
+m = folium.Map(
+    location=[center_lat, center_lon],
+    zoom_start=15,
+    tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    attr="Esri.WorldImagery"
+)
+
+for _, row in df.iterrows():
+    folium.CircleMarker(
+        location=(row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]),
+        radius=3,
+        color="red",
+        fill=True,
+        fill_opacity=0.8
+    ).add_to(m)
+
+# 👉 Full width bản đồ
+st_folium(m, width=None, height=600)
+
 
 # Footer
 st.markdown("---")
