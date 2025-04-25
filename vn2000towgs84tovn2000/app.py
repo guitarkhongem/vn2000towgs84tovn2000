@@ -1,5 +1,7 @@
 
 import streamlit as st
+# ==== CẤU HÌNH GIAO DIỆN ====
+st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
 import pandas as pd
 import math
 import re
