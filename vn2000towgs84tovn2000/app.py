@@ -8,6 +8,26 @@ from streamlit_folium import st_folium
 from functions import vn2000_to_wgs84_baibao, wgs84_to_vn2000_baibao
 import analytics
 
+# Ghi lượt truy cập (có thể thêm IP nếu lấy được)
+analytics.log_visit()
+
+# Tăng like nếu nhấn nút
+analytics.like()
+
+# Hiển thị thống kê cơ bản
+visits, likes = analytics.get_stats()
+st.sidebar.markdown(f"👁️ Lượt truy cập: `{visits}`")
+st.sidebar.markdown(f"👍 Lượt thích: `{likes}`")
+
+# Hiển thị biểu đồ truy cập theo ngày
+df_day = analytics.visits_by_day()
+st.line_chart(df_day.set_index("date"))
+
+# Hiển thị biểu đồ theo giờ (optional)
+df_hour = analytics.visits_by_hour()
+st.bar_chart(df_hour.set_index("hour"))
+
+
 # ==== CẤU HÌNH GIAO DIỆN ====
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
 
