@@ -1,5 +1,25 @@
 import streamlit as st
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
+import base64
+
+def set_background(png_file):
+    with open(png_file, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode()
+    css = f"""
+    <style>
+    .stApp {{
+        background-image: url("data:image/png;base64,{encoded_string}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }}
+    </style>
+    """
+    st.markdown(css, unsafe_allow_html=True)
+
+# Gọi hàm và truyền tên file hình nền
+set_background("background.png")
 
 import pandas as pd
 import math
