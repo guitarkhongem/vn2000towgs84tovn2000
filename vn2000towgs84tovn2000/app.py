@@ -6,9 +6,32 @@ import re
 import folium
 from streamlit_folium import st_folium
 from functions import vn2000_to_wgs84_baibao, wgs84_to_vn2000_baibao
-import analytics  # Import module custom
-# ❗️ PHẢI đặt dòng này NGAY SAU import
+
+# Cấu hình trang – dòng này luôn phải ở đầu tiên
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
+
+# Ghi nhận truy cập và lượt thích
+conn = sqlite3.connect("analytics.db", check_same_thread=False)
+c = conn.cursor()
+c.execute("CREATE TABLE IF NOT EXISTS visits (ts TEXT)")
+c.execute("CREATE TABLE IF NOT EXISTS likes (id INTEGER PRIMARY KEY, count INTEGER)")
+c.execute("INSERT OR IGNORE INTO likes (id, count) VALUES (1, 0)")
+conn.commit()
+c.execute("INSERT INTO visits (ts) VALUES (datetime('now','localtime'))")
+conn.commit()
+visit_count = c.execute("SELECT COUNT(*) FROM visits").fetchone()[0]
+like_count = c.execute("SELECT count FROM likes WHERE id=1").fetchone()[0]
+
+# Sidebar thống kê
+st.sidebar.markdown("## 📊 Thống kê sử dụng")
+st.sidebar.markdown(f"- 🔍 **Lượt truy cập:** `{visit_count}`")
+st.sidebar.markdown(f"- 👍 **Lượt thích:** `{like_count}`")
+if st.sidebar.button("👍 Thích ứng dụng này"):
+    like_count += 1
+    c.execute("UPDATE likes SET count = ? WHERE id = 1", (like_count,))
+    conn.commit()
+    st.sidebar.success("💖 Cảm ơn bạn đã thích!")
+    st.sidebar.markdown(f"- 👍 **Lượt thích:** `{like_count}`")
 
 # Header: Logo + Tên
 col1, col2 = st.columns([1, 5], gap="small")
@@ -88,7 +111,7 @@ with tab2:
         else:
             st.warning("⚠️ Không có dữ liệu hợp lệ (cần 3 số mỗi bộ).")
 
-# Hiển thị kết quả và bản đồ
+# Nếu có kết quả, hiển thị bảng và bản đồ
 if "df" in st.session_state:
     df = st.session_state.df
     st.markdown("### 📊 Kết quả chuyển đổi")
@@ -112,14 +135,23 @@ if "df" in st.session_state:
         for _, row in df.iterrows():
             folium.CircleMarker(
                 location=(row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]),
-                radius=3, color="red", fill=True, fill_opacity=0.8
+                radius=3,
+                color="red",
+                fill=True,
+                fill_opacity=0.8
             ).add_to(m)
-        st_folium(m, width="100%", height=550)
+        st_folium(m, width=800, height=500)
 
 # Footer
-st.markdown("📌 Tác giả: Trần Trường Sinh  \n📞 Số điện thoại: 0917.750.555")
-st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: **CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI CÓ ĐỊNH VỊ TÂM CHỤP CHÍNH XÁC**  \n"
-            "Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  \n"
-            "¹ Trường Đại học Mỏ - Địa chất  \n"
-            "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  \n"
-            "_Hội nghị Khoa học Quốc gia Về Công nghệ Địa không gian, 2021_")
+st.markdown("---")
+st.markdown(
+    "📌 Tác giả: Trần Trường Sinh  \n"
+    "📞 Số điện thoại: 0917.750.555"
+)
+st.markdown(
+    "🔍 **Nguồn công thức**: Bài báo khoa học: **CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI CÓ ĐỊNH VỊ TÂM CHỤP CHÍNH XÁC**  \n"
+    "Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  \n"
+    "¹ Trường Đại học Mỏ - Địa chất  \n"
+    "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  \n"
+    "_Hội nghị Khoa học Quốc gia Về Công nghệ Địa không gian, 2021_"
+)
