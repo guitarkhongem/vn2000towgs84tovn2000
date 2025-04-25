@@ -1,18 +1,16 @@
 import streamlit as st
-import sqlite3
+st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
+
 import pandas as pd
 import math
 import re
 import folium
-import analytics
 from streamlit_folium import st_folium
 from functions import vn2000_to_wgs84_baibao, wgs84_to_vn2000_baibao
+import analytics
+analytics.init_analytics()
 
-# Cấu hình trang – dòng này luôn phải ở đầu tiên
-st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
-
-
-# Header: Logo + Tên
+# Header
 col1, col2 = st.columns([1, 5], gap="small")
 with col1:
     st.image("logo.jpg", width=80)
@@ -20,7 +18,6 @@ with col2:
     st.title("VN2000 ⇄ WGS84 Converter")
     st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA")
 
-# Parse dữ liệu đầu vào
 def parse_coordinates(text, group=3):
     tokens = re.split(r'\s+', text.strip())
     coords = []
@@ -39,7 +36,6 @@ def parse_coordinates(text, group=3):
             i += 1
     return coords
 
-# Xuất file KML
 def df_to_kml(df):
     if not {"Kinh độ (Lon)", "Vĩ độ (Lat)", "H (m)"}.issubset(df.columns):
         return None
@@ -61,7 +57,6 @@ def df_to_kml(df):
     kml += ['  </Document>', '</kml>']
     return "\n".join(kml)
 
-# Tabs: chuyển đổi
 tab1, tab2 = st.tabs(["➡️ VN2000 → WGS84", "⬅️ WGS84 → VN2000"])
 
 with tab1:
@@ -90,7 +85,6 @@ with tab2:
         else:
             st.warning("⚠️ Không có dữ liệu hợp lệ (cần 3 số mỗi bộ).")
 
-# Nếu có kết quả, hiển thị bảng và bản đồ
 if "df" in st.session_state:
     df = st.session_state.df
     st.markdown("### 📊 Kết quả chuyển đổi")
@@ -114,23 +108,11 @@ if "df" in st.session_state:
         for _, row in df.iterrows():
             folium.CircleMarker(
                 location=(row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]),
-                radius=3,
-                color="red",
-                fill=True,
-                fill_opacity=0.8
+                radius=3, color="red", fill=True, fill_opacity=0.8
             ).add_to(m)
         st_folium(m, width=800, height=500)
 
-# Footer
 st.markdown("---")
-st.markdown(
-    "📌 Tác giả: Trần Trường Sinh  \n"
-    "📞 Số điện thoại: 0917.750.555"
-)
-st.markdown(
-    "🔍 **Nguồn công thức**: Bài báo khoa học: **CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI CÓ ĐỊNH VỊ TÂM CHỤP CHÍNH XÁC**  \n"
-    "Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  \n"
-    "¹ Trường Đại học Mỏ - Địa chất  \n"
-    "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  \n"
-    "_Hội nghị Khoa học Quốc gia Về Công nghệ Địa không gian, 2021_"
-)
+st.markdown("📌 Tác giả: Trần Trường Sinh  
+📞 Số điện thoại: 0917.750.555")
+st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: **CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ...**")
