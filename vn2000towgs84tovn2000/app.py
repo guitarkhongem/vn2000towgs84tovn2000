@@ -1,71 +1,26 @@
+
 import streamlit as st
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
 
-# Các import khác
 import analytics
+analytics.log_visit()
+
 import pandas as pd
 import math
 import re
 import folium
 from streamlit_folium import st_folium
 from functions import vn2000_to_wgs84_baibao, wgs84_to_vn2000_baibao
-analytics.log_visit()
 
-# Tăng like nếu nhấn nút
-analytics.like()
-
-# Hiển thị thống kê cơ bản
-visits, likes = analytics.get_stats()
-st.sidebar.markdown(f"👁️ Lượt truy cập: `{visits}`")
-st.sidebar.markdown(f"👍 Lượt thích: `{likes}`")
-
-# Hiển thị biểu đồ truy cập theo ngày
-df_day = analytics.visits_by_day()
-st.line_chart(df_day.set_index("date"))
-
-# Hiển thị biểu đồ theo giờ (optional)
-df_hour = analytics.visits_by_hour()
-st.bar_chart(df_hour.set_index("hour"))
-
-
-# ==== CẤU HÌNH GIAO DIỆN ====
-st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
-
-def set_background(png_file):
-    import base64
-    with open(png_file, "rb") as image_file:
-        encoded = base64.b64encode(image_file.read()).decode()
-    css = f'''
-        <style>
-        .stApp {{
-            background-image: url("data:image/png;base64,{encoded}");
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-        }}
-        .stTextArea textarea {{
-            background-color: rgba(0, 0, 0, 0.65);
-            color: #ffffff;
-        }}
-        .stNumberInput input {{
-            background-color: rgba(0, 0, 0, 0.65);
-            color: #ffffff;
-        }}
-        </style>
-    '''
-    st.markdown(css, unsafe_allow_html=True)
-
-set_background("background.png")
-
-# ==== HEADER ====
+# Header: Logo + Tên
 col1, col2 = st.columns([1, 5], gap="small")
 with col1:
     st.image("logo.jpg", width=80)
 with col2:
-    st.markdown("<h1 style='color:white;'>VN2000 ⇄ WGS84 Converter</h1>", unsafe_allow_html=True)
-    st.markdown("<h3 style='color:white;'>BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA</h3>", unsafe_allow_html=True)
+    st.title("VN2000 ⇄ WGS84 Converter")
+    st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA")
 
-# ==== PARSE TỌA ĐỘ ====
+# Parse dữ liệu đầu vào
 def parse_coordinates(text, group=3):
     tokens = re.split(r'\s+', text.strip())
     coords = []
@@ -75,7 +30,7 @@ def parse_coordinates(text, group=3):
         if (re.search(r'[A-Za-z]', t0) or ('.' not in t0 and re.fullmatch(r'\d+', t0) and len(tokens) - i >= group + 1)):
             i += 1
             continue
-        chunk = tokens[i : i+group]
+        chunk = tokens[i: i+group]
         try:
             vals = [float(x.replace(',', '.')) for x in chunk]
             coords.append(vals)
@@ -84,7 +39,7 @@ def parse_coordinates(text, group=3):
             i += 1
     return coords
 
-# ==== XUẤT FILE KML ====
+# Xuất file KML
 def df_to_kml(df):
     if not {"Kinh độ (Lon)", "Vĩ độ (Lat)", "H (m)"}.issubset(df.columns):
         return None
@@ -106,11 +61,11 @@ def df_to_kml(df):
     kml += ['  </Document>', '</kml>']
     return "\n".join(kml)
 
-# ==== GIAO DIỆN CHUYỂN ĐỔI ====
+# Tabs: chuyển đổi
 tab1, tab2 = st.tabs(["➡️ VN2000 → WGS84", "⬅️ WGS84 → VN2000"])
 
 with tab1:
-    st.markdown("#### 🔢 Nhập tọa độ VN2000 (X Y Z – cách, tab, xuống dòng hoặc STT):")
+    st.markdown("#### 🔢 Nhập tọa độ VN2000 (X Y Z – space/tab/newline hoặc kèm STT):")
     in_vn = st.text_area("", height=120, key="vn_in")
     lon0_vn = st.number_input("🌐 Kinh tuyến trục (°)", value=106.25, format="%.4f", key="lon0_vn")
     if st.button("🔁 Chuyển WGS84"):
@@ -123,7 +78,7 @@ with tab1:
             st.warning("⚠️ Không có dữ liệu hợp lệ (cần 3 số mỗi bộ).")
 
 with tab2:
-    st.markdown("#### 🔢 Nhập tọa độ WGS84 (Lat Lon H – cách, tab, xuống dòng hoặc STT):")
+    st.markdown("#### 🔢 Nhập tọa độ WGS84 (Lat Lon H – space/tab/newline hoặc kèm STT):")
     in_wg = st.text_area("", height=120, key="wg_in")
     lon0_wg = st.number_input("🌐 Kinh tuyến trục (°)", value=106.25, format="%.4f", key="lon0_wg")
     if st.button("🔁 Chuyển VN2000"):
@@ -135,7 +90,7 @@ with tab2:
         else:
             st.warning("⚠️ Không có dữ liệu hợp lệ (cần 3 số mỗi bộ).")
 
-# ==== HIỂN THỊ KẾT QUẢ & MAP ====
+# Hiển thị kết quả và bản đồ
 if "df" in st.session_state:
     df = st.session_state.df
     st.markdown("### 📊 Kết quả chuyển đổi")
@@ -144,14 +99,15 @@ if "df" in st.session_state:
     if {"Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
         kml_str = df_to_kml(df)
         if kml_str:
-            st.download_button("📥 Tải xuống KML", kml_str, "computed_points.kml", "application/vnd.google-earth.kml+xml")
+            st.markdown("### 📥 Xuất file KML tọa độ tính được (WGS84)")
+            st.download_button("Tải xuống KML", kml_str, "computed_points.kml", "application/vnd.google-earth.kml+xml")
 
         st.markdown("### 🛰️ Bản đồ vệ tinh với các điểm tọa độ")
         center_lat = df["Vĩ độ (Lat)"].mean()
         center_lon = df["Kinh độ (Lon)"].mean()
         m = folium.Map(
             location=[center_lat, center_lon],
-            zoom_start=14,
+            zoom_start=15,
             tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
             attr="Esri.WorldImagery"
         )
@@ -162,11 +118,21 @@ if "df" in st.session_state:
             ).add_to(m)
         st_folium(m, width=1200, height=550)
 
-# ==== FOOTER ====
+# Footer
 st.markdown("---")
-st.markdown("📌 Tác giả: Trần Trường Sinh  \n📞 Số điện thoại: 0917.750.555")
-st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: **CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI CÓ ĐỊNH VỊ TÂM CHỤP CHÍNH XÁC**  \n"
-            "Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  \n"
-            "¹ Trường Đại học Mỏ - Địa chất  \n"
-            "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  \n"
-            "_Hội nghị Khoa học Quốc gia Về Công nghệ Địa không gian, 2021_")
+st.markdown(
+    "📌 Tác giả: Trần Trường Sinh  
+"
+    "📞 Số điện thoại: 0917.750.555"
+)
+st.markdown(
+    "🔍 **Nguồn công thức**: Bài báo khoa học: **CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI CÓ ĐỊNH VỊ TÂM CHỤP CHÍNH XÁC**  
+"
+    "Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  
+"
+    "¹ Trường Đại học Mỏ - Địa chất  
+"
+    "² Công ty CP Xây dựng và Thương mại QT Miền Bắc  
+"
+    "_Hội nghị Khoa học Quốc gia Về Công nghệ Địa không gian, 2021_"
+)
