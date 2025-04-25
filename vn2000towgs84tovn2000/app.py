@@ -1,52 +1,36 @@
+
 import streamlit as st
-import base64
+import sqlite3
 import pandas as pd
 import math
 import re
 import folium
-import analytics
 from streamlit_folium import st_folium
 from functions import vn2000_to_wgs84_baibao, wgs84_to_vn2000_baibao
 
-def set_background(png_file):
-    with open(png_file, "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read()).decode()
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background-image: url("data:image/png;base64,{encoded_string}");
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-        }}
-        .stTextArea textarea {{
-            background-color: white !important !important;
-            color: white !important;
-        }}
-        .stTextInput > div > div > input {{
-            background-color: white !important !important;
-            color: white !important;
-        }}
-        .stButton>button {{
-            background-color: #1a73e8;
-            color: white;
-        }}
-        .markdown-text-container, .stMarkdown p {{
-            color: white !important;
-        }}
-        .leaflet-container {{
-            width: 100% !important;
-            height: 600px !important;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
+# Cấu hình trang – luôn phải là dòng đầu tiên
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
-set_background("background.png")
 
+# CSS: làm nổi chữ trên nền sáng
+def set_custom_style():
+    st.markdown("""
+        <style>
+        html, body, [class*="css"] {
+            color: white;
+        }
+        h1, h2, h3, h4, h5, h6, .stMarkdown, .stTextInput label {
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+        textarea, .stTextInput > div > input {
+            background-color: rgba(255, 255, 255, 0.85) !important;
+            color: black !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+set_custom_style()
+
+# Header
 col1, col2 = st.columns([1, 5], gap="small")
 with col1:
     st.image("logo.jpg", width=80)
@@ -54,6 +38,7 @@ with col2:
     st.title("VN2000 ⇄ WGS84 Converter")
     st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA")
 
+# Hàm parse đầu vào
 def parse_coordinates(text, group=3):
     tokens = re.split(r'\s+', text.strip())
     coords = []
@@ -72,6 +57,7 @@ def parse_coordinates(text, group=3):
             i += 1
     return coords
 
+# Xuất file KML
 def df_to_kml(df):
     if not {"Kinh độ (Lon)", "Vĩ độ (Lat)", "H (m)"}.issubset(df.columns):
         return None
@@ -93,6 +79,7 @@ def df_to_kml(df):
     kml += ['  </Document>', '</kml>']
     return "\n".join(kml)
 
+# Tabs
 tab1, tab2 = st.tabs(["➡️ VN2000 → WGS84", "⬅️ WGS84 → VN2000"])
 
 with tab1:
@@ -129,8 +116,7 @@ if "df" in st.session_state:
     if {"Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
         kml_str = df_to_kml(df)
         if kml_str:
-            st.markdown("### 📥 Xuất file KML tọa độ tính được (WGS84)")
-            st.download_button("Tải xuống KML", kml_str, "computed_points.kml", "application/vnd.google-earth.kml+xml")
+            st.download_button("📥 Tải file KML", kml_str, "computed_points.kml", "application/vnd.google-earth.kml+xml")
 
         st.markdown("### 🛰️ Bản đồ vệ tinh với các điểm tọa độ")
         center_lat = df["Vĩ độ (Lat)"].mean()
@@ -149,10 +135,17 @@ if "df" in st.session_state:
                 fill=True,
                 fill_opacity=0.8
             ).add_to(m)
-        st_folium(m, width="100%", height=1400)
+        st_folium(m, width=1280, height=600)
 
 # ==== 7. FOOTER ====
 st.markdown("---")
+st.markdown("📌 Tác giả: Trần Trường Sinh  
+📞 Số điện thoại: 0917.750.555")
+st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: **CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI CÓ ĐỊNH VỊ TÂM CHỤP CHÍNH XÁC**  
+Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  
+¹ Trường Đại học Mỏ - Địa chất  
+² Công ty CP Xây dựng và Thương mại QT Miền Bắc  
+_Hội nghị Khoa học Quốc gia Về Công nghệ Địa không gian, 2021_")
 st.markdown("📌 Tác giả: Trần Trường Sinh  \n📞 Số điện thoại: 0917.750.555")
 st.markdown("🔍 **Nguồn công thức**: Bài báo khoa học: **CÔNG TÁC TÍNH CHUYỂN TỌA ĐỘ TRONG CÔNG NGHỆ MÁY BAY KHÔNG NGƯỜI LÁI CÓ ĐỊNH VỊ TÂM CHỤP CHÍNH XÁC**  \n"
             "Tác giả: Trần Trung Anh¹, Quách Mạnh Tuấn²  \n"
