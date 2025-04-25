@@ -37,6 +37,32 @@ def parse_coordinates(text, group=3):
         except ValueError:
             i += 1
     return coords
+# 4) Hàm xuất KML cho các điểm tính được (chỉ dành cho kết quả VN2000 → WGS84)
+def df_to_kml(df):
+    """
+    Chỉ nhận DataFrame có cột 'Kinh độ (Lon)' và 'Vĩ độ (Lat)'.
+    Trả về chuỗi KML, còn nếu thiếu cột thì None.
+    """
+    if not {"Kinh độ (Lon)", "Vĩ độ (Lat)"}.issubset(df.columns):
+        return None
+
+    kml = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<kml xmlns="http://www.opengis.net/kml/2.2">',
+        '  <Document>',
+        '    <name>Computed Points (WGS84)</name>'
+    ]
+    for idx, row in df.iterrows():
+        kml += [
+            '    <Placemark>',
+            f'      <name>Point {idx+1}</name>',
+            '      <Point>',
+            f'        <coordinates>{row["Kinh độ (Lon)"]},{row["Vĩ độ (Lat)"]},{row["H (m)"]}</coordinates>',
+            '      </Point>',
+            '    </Placemark>'
+        ]
+    kml += ['  </Document>', '</kml>']
+    return "\n".join(kml)
 
 # Tabs cho chuyển đổi
 tab1, tab2 = st.tabs(["➡️ VN2000 → WGS84", "⬅️ WGS84 → VN2000"])
@@ -66,6 +92,27 @@ with tab2:
             st.session_state.df = df
         else:
             st.warning("⚠️ Không có dữ liệu hợp lệ (cần 3 số mỗi bộ).")
+# 6) Khi đã có kết quả VN2000→WGS84, cho phép xuất KML; nếu không phải VN→WGS84 thì bỏ qua
+if "df" in st.session_state:
+    df = st.session_state.df
+
+    # Nếu DataFrame có cột Lat/Lon (VN2000→WGS84), mới hiển thị nút download KML
+    kml_str = df_to_kml(df)
+    if kml_str:
+        st.markdown("### 📥 Xuất file KML tọa độ tính được (WGS84)")
+        st.download_button(
+            label="Tải xuống KML (computed_points.kml)",
+            data=kml_str,
+            file_name="computed_points.kml",
+            mime="application/vnd.google-earth.kml+xml"
+        )
+    else:
+        st.info("ℹ️ Chỉ hỗ trợ xuất KML cho kết quả VN2000 → WGS84.")
+
+    # Tiếp theo bạn vẫn có thể vẽ map Folium nếu muốn...
+    st.markdown("### 📍 Bản đồ vệ tinh với các điểm chuyển đổi")
+    # ... rest of your Folium code ...
+
 
 # Nếu có kết quả, hiển thị bảng và bản đồ
 if "df" in st.session_state:
