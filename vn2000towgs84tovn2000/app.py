@@ -1,3 +1,5 @@
+set_background("background.png")
+
 import streamlit as st
 # app.py – Nhúng CSS tuỳ chỉnh để làm đẹp nền và khung nhập
 import streamlit as st
@@ -25,6 +27,24 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+import base64
+
+def set_background(png_file):
+    with open(png_file, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode()
+    css = f"""
+    <style>
+    .stApp {{
+        background-image: url("data:image/png;base64,{encoded_string}");
+        background-size: cover;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        background-position: center;
+    }}
+    </style>
+    """
+    import streamlit as st
+    st.markdown(css, unsafe_allow_html=True)
 
 # Gọi hàm và truyền tên file hình nền
 set_background("background.png")
