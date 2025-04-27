@@ -19,6 +19,15 @@ from functions.mapgen import generate_map
 # Setup page
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
 set_background("assets/background.png")
+# --- CSS chỉnh màu chữ nút thành đỏ đậm ---
+st.markdown("""
+<style>
+div.stButton > button, div.stDownloadButton > button {
+    color: #B30000;
+    font-weight: bold;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # Header
 col1, col2 = st.columns([1, 5])
