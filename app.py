@@ -67,33 +67,17 @@ with tab1:
     selected_display = st.selectbox("Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_vn2000")
     selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
 
-    st.markdown("#### Nhập toạ độ VN2000 (X Y H hoặc mã hiệu E/N)")
-    coords_input = st.text_area("Mỗi dòng một giá trị", height=180)
-
-    uploaded_file_vn2000 = st.file_uploader("📂 Hoặc upload file TXT/CSV", type=["txt", "csv"], key="upload_vn2000")
+    uploaded_file_vn2000 = st.file_uploader("📂 Upload file TXT/CSV", type=["txt", "csv"], key="upload_vn2000")
+    if uploaded_file_vn2000:
+        content = uploaded_file_vn2000.read().decode("utf-8")
+        coords_input = st.text_area("Nội dung file:", content, height=180)
+    else:
+        coords_input = st.text_area("Nhập toạ độ VN2000 (X Y H hoặc mã hiệu E/N):", height=180)
 
     parsed, errors = [], []
 
-    if uploaded_file_vn2000:
-        try:
-            df_uploaded = pd.read_csv(uploaded_file_vn2000, delim_whitespace=True, header=None)
-        except:
-            df_uploaded = pd.read_csv(uploaded_file_vn2000, header=None)
-
-        for row in df_uploaded.values.tolist():
-            if len(row) >= 4:
-                try:
-                    stt = str(row[0])
-                    x = float(str(row[1]).replace(",", "."))
-                    y = float(str(row[2]).replace(",", "."))
-                    h = float(str(row[3]).replace(",", "."))
-                    parsed.append([stt, x, y, h])
-                except:
-                    continue
-
     if st.button("Chuyển sang WGS84"):
-        if not uploaded_file_vn2000:
-            parsed, errors = parse_coordinates(coords_input)
+        parsed, errors = parse_coordinates(coords_input)
 
     if parsed:
         df = pd.DataFrame(
@@ -116,46 +100,31 @@ with tab2:
     selected_display = st.selectbox("Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_wgs84")
     selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
 
-    st.markdown("#### Nhập toạ độ WGS84 (Lat Lon H)")
-    coords_input_wgs84 = st.text_area("Mỗi dòng một giá trị", height=180, key="wgs84input")
-
-    uploaded_file_wgs84 = st.file_uploader("📂 Hoặc upload file TXT/CSV", type=["txt", "csv"], key="upload_wgs84")
+    uploaded_file_wgs84 = st.file_uploader("📂 Upload file TXT/CSV", type=["txt", "csv"], key="upload_wgs84")
+    if uploaded_file_wgs84:
+        content_wgs84 = uploaded_file_wgs84.read().decode("utf-8")
+        coords_input_wgs84 = st.text_area("Nội dung file:", content_wgs84, height=180)
+    else:
+        coords_input_wgs84 = st.text_area("Nhập toạ độ WGS84 (Lat Lon H):", height=180, key="wgs84input")
 
     parsed_wgs84 = []
 
-    if uploaded_file_wgs84:
-        try:
-            df_uploaded = pd.read_csv(uploaded_file_wgs84, delim_whitespace=True, header=None)
-        except:
-            df_uploaded = pd.read_csv(uploaded_file_wgs84, header=None)
-
-        for row in df_uploaded.values.tolist():
-            if len(row) >= 3:
-                try:
-                    lat = float(str(row[0]).replace(",", "."))
-                    lon = float(str(row[1]).replace(",", "."))
-                    h = float(str(row[2]).replace(",", "."))
-                    parsed_wgs84.append([lat, lon, h])
-                except:
-                    continue
-
     if st.button("Chuyển sang VN2000"):
-        if not uploaded_file_wgs84:
-            tokens = re.split(r'[\s\n]+', coords_input_wgs84.strip())
-            i = 0
-            while i < len(tokens):
-                chunk = []
-                for _ in range(3):
-                    if i < len(tokens):
-                        try:
-                            chunk.append(float(tokens[i].replace(",", ".")))
-                        except:
-                            break
-                        i += 1
-                if len(chunk) == 2:
-                    chunk.append(0.0)
-                if len(chunk) == 3:
-                    parsed_wgs84.append(chunk)
+        tokens = re.split(r'[\s\n]+', coords_input_wgs84.strip())
+        i = 0
+        while i < len(tokens):
+            chunk = []
+            for _ in range(3):
+                if i < len(tokens):
+                    try:
+                        chunk.append(float(tokens[i].replace(",", ".")))
+                    except:
+                        break
+                    i += 1
+            if len(chunk) == 2:
+                chunk.append(0.0)
+            if len(chunk) == 3:
+                parsed_wgs84.append(chunk)
 
     if parsed_wgs84:
         df = pd.DataFrame(
