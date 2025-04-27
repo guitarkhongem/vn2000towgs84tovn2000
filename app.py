@@ -71,13 +71,15 @@ with tab1:
     coords_input = st.text_area("Mỗi dòng một giá trị", height=180)
 
     uploaded_file_vn2000 = st.file_uploader("📂 Hoặc upload file TXT/CSV", type=["txt", "csv"], key="upload_vn2000")
+
+    parsed, errors = [], []
+
     if uploaded_file_vn2000:
         try:
             df_uploaded = pd.read_csv(uploaded_file_vn2000, delim_whitespace=True, header=None)
         except:
             df_uploaded = pd.read_csv(uploaded_file_vn2000, header=None)
 
-        coords = []
         for row in df_uploaded.values.tolist():
             if len(row) >= 4:
                 try:
@@ -85,19 +87,15 @@ with tab1:
                     x = float(str(row[1]).replace(",", "."))
                     y = float(str(row[2]).replace(",", "."))
                     h = float(str(row[3]).replace(",", "."))
-                    coords.append([stt, x, y, h])
+                    parsed.append([stt, x, y, h])
                 except:
                     continue
-            else:
-                continue
 
-        parsed = coords
-        errors = []
+    if st.button("Chuyển sang WGS84"):
+        if not uploaded_file_vn2000:
+            parsed, errors = parse_coordinates(coords_input)
 
-    elif st.button("Chuyển sang WGS84"):
-        parsed, errors = parse_coordinates(coords_input)
-
-    if 'parsed' in locals() and parsed:
+    if parsed:
         df = pd.DataFrame(
             [(ten_diem, *vn2000_to_wgs84_baibao(x, y, h, selected_lon0)) for ten_diem, x, y, h in parsed],
             columns=["Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]
@@ -108,94 +106,75 @@ with tab1:
             for _, row in df.iterrows()
         )
         st.success(f"✅ Đã xử lý {len(df)} điểm hợp lệ.")
-    else:
-        if 'errors' in locals() and errors:
-            st.error(f"🚨 Có {len(errors)} dòng lỗi:")
-            df_errors = pd.DataFrame(errors, columns=["Tên điểm", "X", "Y", "H"])
-            st.dataframe(df_errors.style.set_properties(**{'background-color': 'pink'}))
+    elif errors:
+        st.error(f"🚨 Có {len(errors)} dòng lỗi:")
+        df_errors = pd.DataFrame(errors, columns=["Tên điểm", "X", "Y", "H"])
+        st.dataframe(df_errors.style.set_properties(**{'background-color': 'pink'}))
+
 with tab2:
     st.subheader("WGS84 ➔ VN2000")
     selected_display = st.selectbox("Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_wgs84")
     selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
 
     st.markdown("#### Nhập toạ độ WGS84 (Lat Lon H)")
-    coords_input = st.text_area("Mỗi dòng một giá trị", height=180, key="wgs84input")
+    coords_input_wgs84 = st.text_area("Mỗi dòng một giá trị", height=180, key="wgs84input")
 
     uploaded_file_wgs84 = st.file_uploader("📂 Hoặc upload file TXT/CSV", type=["txt", "csv"], key="upload_wgs84")
+
+    parsed_wgs84 = []
+
     if uploaded_file_wgs84:
         try:
             df_uploaded = pd.read_csv(uploaded_file_wgs84, delim_whitespace=True, header=None)
         except:
             df_uploaded = pd.read_csv(uploaded_file_wgs84, header=None)
 
-        coords = []
         for row in df_uploaded.values.tolist():
             if len(row) >= 3:
                 try:
                     lat = float(str(row[0]).replace(",", "."))
                     lon = float(str(row[1]).replace(",", "."))
                     h = float(str(row[2]).replace(",", "."))
-                    coords.append([lat, lon, h])
+                    parsed_wgs84.append([lat, lon, h])
                 except:
                     continue
-            else:
-                continue
 
-        if coords:
-            df = pd.DataFrame(
-                [("", *wgs84_to_vn2000_baibao(lat, lon, h, selected_lon0)) for lat, lon, h in coords],
-                columns=["Tên điểm", "X (m)", "Y (m)", "h (m)"]
-            )
-            st.session_state.df = df
-            st.session_state.textout = "\n".join(
-                f"{row['Tên điểm']} {row['X (m)']} {row['Y (m)']} {row['h (m)']}"
-                for _, row in df.iterrows()
-            )
-            st.success(f"✅ Đã xử lý {len(df)} điểm từ file.")
-        else:
-            st.error("⚠️ File không có dòng hợp lệ!")
+    if st.button("Chuyển sang VN2000"):
+        if not uploaded_file_wgs84:
+            tokens = re.split(r'[\s\n]+', coords_input_wgs84.strip())
+            i = 0
+            while i < len(tokens):
+                chunk = []
+                for _ in range(3):
+                    if i < len(tokens):
+                        try:
+                            chunk.append(float(tokens[i].replace(",", ".")))
+                        except:
+                            break
+                        i += 1
+                if len(chunk) == 2:
+                    chunk.append(0.0)
+                if len(chunk) == 3:
+                    parsed_wgs84.append(chunk)
 
-    elif st.button("Chuyển sang VN2000"):
-        tokens = re.split(r'[\s\n]+', coords_input.strip())
-        coords = []
-        i = 0
-        while i < len(tokens):
-            chunk = []
-            for _ in range(3):
-                if i < len(tokens):
-                    try:
-                        chunk.append(float(tokens[i].replace(",", ".")))
-                    except:
-                        break
-                    i += 1
-            if len(chunk) == 2:
-                chunk.append(0.0)
-            if len(chunk) == 3:
-                coords.append(chunk)
-            else:
-                i += 1
-
-        if coords:
-            df = pd.DataFrame(
-                [("", *wgs84_to_vn2000_baibao(lat, lon, h, selected_lon0)) for lat, lon, h in coords],
-                columns=["Tên điểm", "X (m)", "Y (m)", "h (m)"]
-            )
-            st.session_state.df = df
-            st.session_state.textout = "\n".join(
-                f"{row['Tên điểm']} {row['X (m)']} {row['Y (m)']} {row['h (m)']}"
-                for _, row in df.iterrows()
-            )
-            st.success(f"✅ Đã xử lý {len(df)} điểm.")
-        else:
-            st.error("⚠️ Không có dữ liệu hợp lệ!")
-
+    if parsed_wgs84:
+        df = pd.DataFrame(
+            [wgs84_to_vn2000_baibao(lat, lon, h, selected_lon0) for lat, lon, h in parsed_wgs84],
+            columns=["X (m)", "Y (m)", "H (m)"]
+        )
+        st.session_state.df = df
+        st.session_state.textout = "\n".join(
+            f"{row['X (m)']} {row['Y (m)']} {row['H (m)']}"
+            for _, row in df.iterrows()
+        )
+        st.success(f"✅ Đã xử lý {len(df)} điểm.")
 
 if "df" in st.session_state:
     df = st.session_state.df
-    st.markdown("### Kết quả")
+    st.markdown("### 📊 Kết quả")
     st.dataframe(df)
 
-    st.markdown("### Kết quả Text")
+    st.markdown("### 📄 Kết quả dạng Text")
     st.text_area("Kết quả:", st.session_state.get("textout", ""), height=250)
 
     st.download_button(
@@ -214,9 +193,8 @@ if "df" in st.session_state:
             mime="application/vnd.google-earth.kml+xml"
         )
 
-    if isinstance(df, pd.DataFrame) and {"Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
-        st.markdown("### Bản đồ vệ tinh")
-
+    if {"Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
+        st.markdown("### 🌍 Bản đồ vệ tinh")
         st.markdown("""
         <style>
         iframe {
