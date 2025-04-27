@@ -36,7 +36,7 @@ with col1:
     st.image("assets/logo.jpg", width=90)
 with col2:
     st.title("VN2000 ⇄ WGS84 Converter")
-    st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚcNG HÓA")
+    st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚng Hóa")
 
 # Danh sách kinh tuyến trục
 lon0_choices = {
@@ -44,14 +44,14 @@ lon0_choices = {
     104.75: "Lào Cai, Phú Thọ, Nghệ An, An Giang",
     105.0: "Vĩnh Phúc, Hà Nam, Ninh Bình, Thanh Hóa, Đồng Tháp, TP. Cần Thơ, Hậu Giang, Bạc Liêu",
     105.5: "Hà Giang, Bắc Ninh, Hải Dương, Hưng Yên, Nam Định, Thái Bình, Hà Tĩnh, Tây Ninh, Vĩnh Long, Trà Vinh",
-    105.75: "TP. Hải Phòng, Bình Dương, Long An, Tiền Giang, Bến Tre, TP. HỒ Chí Minh",
+    105.75: "TP. Hải Phòng, Bình Dương, Long An, Tiền Giang, Bến Tre, TP. Hồ Chí Minh",
     106.0: "Tuyên Quang, Hòa Bình, Quảng Bình",
     106.25: "Quảng Trị, Bình Phước",
     106.5: "Bắc Kạn, Thái Nguyên",
     107.0: "Bắc Giang, Thừa Thiên – Huế",
     107.25: "Lạng Sơn",
     107.5: "Kon Tum",
-    107.75: "TP. Đà Nẵng, Quảng Nam, Đồng Nai, Bà Rịa – Võng Tàu, Lâm Đồng",
+    107.75: "TP. Đà Nẵng, Quảng Nam, Đồng Nai, Bà Rịa – Vũng Tàu, Lâm Đồng",
     108.0: "Quảng Ngãi",
     108.25: "Bình Định, Khánh Hòa, Ninh Thuận",
     108.5: "Gia Lai, Đắk Lắk, Đắk Nông, Phú Yên, Bình Thuận"
@@ -68,12 +68,8 @@ with tab1:
     selected_display = st.selectbox("Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_vn2000")
     selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
 
-    uploaded_file_vn2000 = st.file_uploader("📤 Upload file TXT hoặc CSV", type=["txt", "csv"], key="upload_vn2000")
-    if uploaded_file_vn2000 is not None:
-        content = uploaded_file_vn2000.read().decode("utf-8")
-        coords_input = st.text_area("Mỗi dòng một giá trị", value=content, height=180, key="vn2000_input")
-    else:
-        coords_input = st.text_area("Mỗi dòng một giá trị", height=180, key="vn2000_input")
+    st.markdown("#### Nhập toạ độ VN2000 (X Y H hoặc mã hiệu E/N)")
+    coords_input = st.text_area("Mỗi dòng một giá trị", height=180)
 
     if st.button("Chuyển sang WGS84"):
         parsed, errors = parse_coordinates(coords_input)
@@ -102,12 +98,8 @@ with tab2:
     selected_display = st.selectbox("Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_wgs84")
     selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
 
-    uploaded_file_wgs84 = st.file_uploader("📤 Upload file TXT hoặc CSV", type=["txt", "csv"], key="upload_wgs84")
-    if uploaded_file_wgs84 is not None:
-        content = uploaded_file_wgs84.read().decode("utf-8")
-        coords_input = st.text_area("Mỗi dòng một giá trị", value=content, height=180, key="wgs84_input")
-    else:
-        coords_input = st.text_area("Mỗi dòng một giá trị", height=180, key="wgs84_input")
+    st.markdown("#### Nhập toạ độ WGS84 (Lat Lon H)")
+    coords_input = st.text_area("Mỗi dòng một giá trị", height=180, key="wgs84input")
 
     if st.button("Chuyển sang VN2000"):
         tokens = re.split(r'[\s\n]+', coords_input.strip())
