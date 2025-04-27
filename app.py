@@ -39,7 +39,23 @@ with col2:
     st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚng Hóa")
 
 # Danh sách kinh tuyến trục
-lon0_choices = { ... } # giữ nguyên danh sách kinh tuyến trục như trước
+lon0_choices = {
+    104.5: "Kiên Giang, Cà Mau",
+    104.75: "Lào Cai, Phú Thọ, Nghệ An, An Giang",
+    105.0: "Vĩnh Phúc, Hà Nam, Ninh Bình, Thanh Hóa, Đồng Tháp, TP. Cần Thơ, Hậu Giang, Bạc Liêu",
+    105.5: "Hà Giang, Bắc Ninh, Hải Dương, Hưng Yên, Nam Định, Thái Bình, Hà Tĩnh, Tây Ninh, Vĩnh Long, Trà Vinh",
+    105.75: "TP. Hải Phòng, Bình Dương, Long An, Tiền Giang, Bến Tre, TP. Hồ Chí Minh",
+    106.0: "Tuyên Quang, Hòa Bình, Quảng Bình",
+    106.25: "Quảng Trị, Bình Phước",
+    106.5: "Bắc Kạn, Thái Nguyên",
+    107.0: "Bắc Giang, Thừa Thiên – Huế",
+    107.25: "Lạng Sơn",
+    107.5: "Kon Tum",
+    107.75: "TP. Đà Nẵng, Quảng Nam, Đồng Nai, Bà Rịa – Vũng Tàu, Lâm Đồng",
+    108.0: "Quảng Ngãi",
+    108.25: "Bình Định, Khánh Hòa, Ninh Thuận",
+    108.5: "Gia Lai, Đắk Lắk, Đắk Nông, Phú Yên, Bình Thuận"
+}
 
 lon0_display = [f"{lon} – {province}" for lon, province in lon0_choices.items()]
 default_index = list(lon0_choices.keys()).index(106.25)
@@ -48,8 +64,34 @@ default_index = list(lon0_choices.keys()).index(106.25)
 tab1, tab2 = st.tabs(["VN2000 ➔ WGS84", "WGS84 ➔ VN2000"])
 
 with tab1:
-    ... # giữ nguyên phần tab1 như bạn yêu cầu
+    st.subheader("VN2000 ➔ WGS84")
+    selected_display = st.selectbox("Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_vn2000")
+    selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
 
+    st.markdown("#### Nhập toạ độ VN2000 (X Y H hoặc mã hiệu E/N)")
+    coords_input = st.text_area("Mỗi dòng một giá trị", height=180)
+
+    if st.button("Chuyển sang WGS84"):
+        parsed, errors = parse_coordinates(coords_input)
+
+        if parsed:
+            df = pd.DataFrame(
+                [(ten_diem, *vn2000_to_wgs84_baibao(x, y, h, selected_lon0)) for ten_diem, x, y, h in parsed],
+                columns=["Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]
+            )
+            st.session_state.df = df
+            st.session_state.textout = "\n".join(
+                f"{row['Tên điểm']} {row['Vĩ độ (Lat)']} {row['Kinh độ (Lon)']} {row['H (m)']}"
+                for _, row in df.iterrows()
+            )
+            st.success(f"✅ Đã xử lý {len(df)} điểm hợp lệ.")
+        else:
+            st.error("⚠️ Không có dữ liệu hợp lệ!")
+
+        if errors:
+            st.error(f"🚨 Có {len(errors)} dòng lỗi:")
+            df_errors = pd.DataFrame(errors, columns=["Tên điểm", "X", "Y", "H"])
+            st.dataframe(df_errors.style.set_properties(**{'background-color': 'pink'}))
 with tab2:
     st.subheader("WGS84 ➔ VN2000")
     selected_display = st.selectbox("Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_wgs84")
