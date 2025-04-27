@@ -80,26 +80,30 @@ with tab1:
     selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
 
     if st.button("Chuyển sang WGS84"):
-        parsed, errors = parse_coordinates(coords_input)
-
-        if parsed:
-            df = pd.DataFrame(
-                [(ten_diem, *vn2000_to_wgs84_baibao(x, y, h, selected_lon0)) for ten_diem, x, y, h in parsed],
-                columns=["Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]
-            )
-            st.session_state.df = df
-            st.session_state.textout = "\n".join(
-                f"{row['Tên điểm']} {row['Vĩ độ (Lat)']} {row['Kinh độ (Lon)']} {row['H (m)']}"
-                for _, row in df.iterrows()
-            )
-            st.success(f"✅ Đã xử lý {len(df)} điểm hợp lệ.")
+        if coords_input.strip() == "":
+            st.error("⚠️ Không có dữ liệu để xử lý!")
         else:
-            st.error("⚠️ Không có dữ liệu hợp lệ!")
+            parsed, errors = parse_coordinates(coords_input)
 
-        if errors:
-            st.error(f"🚨 Có {len(errors)} dòng lỗi:")
-            df_errors = pd.DataFrame(errors, columns=["Tên điểm", "X", "Y", "H"])
-            st.dataframe(df_errors.style.set_properties(**{'background-color': 'pink'}))
+            if parsed:
+                df = pd.DataFrame(
+                    [(ten_diem, *vn2000_to_wgs84_baibao(x, y, h, selected_lon0)) for ten_diem, x, y, h in parsed],
+                    columns=["Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]
+                )
+                st.session_state.df = df
+                st.session_state.textout = "\n".join(
+                    f"{row['Tên điểm']} {row['Vĩ độ (Lat)']} {row['Kinh độ (Lon)']} {row['H (m)']}"
+                    for _, row in df.iterrows()
+                )
+                st.success(f"✅ Đã xử lý {len(df)} điểm hợp lệ.")
+            else:
+                st.error("⚠️ Không có dữ liệu hợp lệ!")
+
+            if errors:
+                st.error(f"🚨 Có {len(errors)} dòng lỗi:")
+                df_errors = pd.DataFrame(errors, columns=["Tên điểm", "X", "Y", "H"])
+                st.dataframe(df_errors.style.set_properties(**{'background-color': 'pink'}))
+
 
 with tab2:
     st.subheader("WGS84 ➔ VN2000")
