@@ -134,11 +134,11 @@ if "df" in st.session_state:
     st.markdown("### 📊 Kết quả")
     st.dataframe(df)
 
-    st.markdown("### 📝 Kết quả Text")
+    st.markdown("### 📄 Kết quả Text")
     st.text_area("Kết quả:", st.session_state.get("textout", ""), height=250)
 
     st.download_button(
-        label="📅 Tải xuống CSV",
+        label="📥 Tải CSV",
         data=df.to_csv(index=False).encode("utf-8"),
         file_name="converted_points.csv",
         mime="text/csv"
@@ -147,27 +147,27 @@ if "df" in st.session_state:
     kml = df_to_kml(df)
     if kml:
         st.download_button(
-            label="📅 Tải xuống KML",
+            label="📥 Tải KML",
             data=kml,
             file_name="converted_points.kml",
             mime="application/vnd.google-earth.kml+xml"
         )
 
-if {"Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
-    st.markdown("### 🌍 Bản đồ vệ tinh")
+    if isinstance(df, pd.DataFrame) and {"Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
+        st.markdown("### 🌍 Bản đồ vệ tinh")
 
-    # --- Ép cứng height cho iframe Folium ---
-    st.markdown("""
-    <style>
-    iframe {
-        height: 550px !important;
-        min-height: 550px !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+        st.markdown(\"\"\"
+        <style>
+        iframe {
+            height: 550px !important;
+            min-height: 550px !important;
+        }
+        </style>
+        \"\"\", unsafe_allow_html=True)
 
-    m = generate_map(df)
-    st_folium(m, width="100%", height=550)
+        m = generate_map(df)
+        st_folium(m, width="100%", height=550)
+
 
 
 show_footer()
