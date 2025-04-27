@@ -68,17 +68,20 @@ with tab1:
     selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
 
     uploaded_file_vn2000 = st.file_uploader("📂 Upload file TXT/CSV", type=["txt", "csv"], key="upload_vn2000")
+    
+    parsed, errors = [], []
     if uploaded_file_vn2000:
         content = uploaded_file_vn2000.read().decode("utf-8")
         coords_input = st.text_area("Nội dung file:", content, height=180)
+        parsed, errors = parse_coordinates(content)   # ✅ Parse ngay sau upload
     else:
         coords_input = st.text_area("Nhập toạ độ VN2000 (X Y H hoặc mã hiệu E/N):", height=180)
 
-    parsed, errors = [], []
-
     if st.button("Chuyển sang WGS84"):
-        parsed, errors = parse_coordinates(coords_input)
+        if not parsed:    # Nếu chưa có parsed từ upload
+            parsed, errors = parse_coordinates(coords_input)
 
+    # Đến đây parsed luôn có sẵn ➔ không lỗi nữa
     if parsed:
         df = pd.DataFrame(
             [(ten_diem, *vn2000_to_wgs84_baibao(x, y, h, selected_lon0)) for ten_diem, x, y, h in parsed],
@@ -94,7 +97,6 @@ with tab1:
         st.error(f"🚨 Có {len(errors)} dòng lỗi:")
         df_errors = pd.DataFrame(errors, columns=["Tên điểm", "X", "Y", "H"])
         st.dataframe(df_errors.style.set_properties(**{'background-color': 'pink'}))
-
 with tab2:
     st.subheader("WGS84 ➔ VN2000")
     selected_display = st.selectbox("Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_wgs84")
