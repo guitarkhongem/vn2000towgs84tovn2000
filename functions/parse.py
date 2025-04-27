@@ -1,9 +1,12 @@
-# --- functions/parse.py ---
 import re
 
 def parse_coordinates(text):
+    if not text:  # 👈 Thêm dòng kiểm tra rỗng ngay đầu
+        return [], []
+        
     tokens = re.split(r'[\s\n]+', text.strip())
     coords = []
+    errors = []
     i = 0
     while i < len(tokens):
         token = tokens[i]
@@ -32,7 +35,7 @@ def parse_coordinates(text):
             i += 1
             continue
 
-        # --- Nếu có 4 token liên tiếp (STT X Y Z) ---
+        # --- Nếu có 4 token liên tiếp (STT X Y H) ---
         if i + 3 < len(tokens):
             stt = tokens[i]
             try:
@@ -45,7 +48,7 @@ def parse_coordinates(text):
             except:
                 pass
 
-        # --- Nếu chỉ có 2 hoặc 3 token (X Y [Z]) ---
+        # --- Nếu chỉ có 2 hoặc 3 token (X Y [H]) ---
         chunk = []
         for _ in range(3):
             if i < len(tokens):
@@ -61,9 +64,12 @@ def parse_coordinates(text):
         else:
             i += 1
 
-    # --- Lọc hợp lệ ---
+    # --- Phân loại dữ liệu hợp lệ và lỗi ---
     filtered = []
     for ten_diem, x, y, h in coords:
         if 500_000 <= x <= 2_650_000 and 330_000 <= y <= 670_000 and -1000 <= h <= 3200:
             filtered.append([ten_diem, x, y, h])
-    return filtered
+        else:
+            errors.append([ten_diem, x, y, h])
+
+    return filtered, errors
