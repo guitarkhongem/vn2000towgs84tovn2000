@@ -36,7 +36,7 @@ with col1:
     st.image("assets/logo.jpg", width=90)
 with col2:
     st.title("VN2000 ⇄ WGS84 Converter")
-    st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚng Hóa")
+    st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA")
 
 # Danh sách kinh tuyến trục
 lon0_choices = {
@@ -56,7 +56,6 @@ lon0_choices = {
     108.25: "Bình Định, Khánh Hòa, Ninh Thuận",
     108.5: "Gia Lai, Đắk Lắk, Đắk Nông, Phú Yên, Bình Thuận"
 }
-
 lon0_display = [f"{lon} – {province}" for lon, province in lon0_choices.items()]
 default_index = list(lon0_choices.keys()).index(106.25)
 
@@ -71,27 +70,51 @@ with tab1:
     st.markdown("#### Nhập toạ độ VN2000 (X Y H hoặc mã hiệu E/N)")
     coords_input = st.text_area("Mỗi dòng một giá trị", height=180)
 
-    if st.button("Chuyển sang WGS84"):
+    uploaded_file_vn2000 = st.file_uploader("📂 Hoặc upload file TXT/CSV", type=["txt", "csv"], key="upload_vn2000")
+    if uploaded_file_vn2000:
+        try:
+            df_uploaded = pd.read_csv(uploaded_file_vn2000, delim_whitespace=True, header=None)
+        except:
+            df_uploaded = pd.read_csv(uploaded_file_vn2000, header=None)
+
+        coords = []
+        for row in df_uploaded.values.tolist():
+            if len(row) >= 4:
+                try:
+                    stt = str(row[0])
+                    x = float(str(row[1]).replace(",", "."))
+                    y = float(str(row[2]).replace(",", "."))
+                    h = float(str(row[3]).replace(",", "."))
+                    coords.append([stt, x, y, h])
+                except:
+                    continue
+            else:
+                continue
+
+        parsed = coords
+        errors = []
+
+    elif st.button("Chuyển sang WGS84"):
         parsed, errors = parse_coordinates(coords_input)
 
-        if parsed:
-            df = pd.DataFrame(
-                [(ten_diem, *vn2000_to_wgs84_baibao(x, y, h, selected_lon0)) for ten_diem, x, y, h in parsed],
-                columns=["Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]
-            )
-            st.session_state.df = df
-            st.session_state.textout = "\n".join(
-                f"{row['Tên điểm']} {row['Vĩ độ (Lat)']} {row['Kinh độ (Lon)']} {row['H (m)']}"
-                for _, row in df.iterrows()
-            )
-            st.success(f"✅ Đã xử lý {len(df)} điểm hợp lệ.")
-        else:
-            st.error("⚠️ Không có dữ liệu hợp lệ!")
-
-        if errors:
+    if 'parsed' in locals() and parsed:
+        df = pd.DataFrame(
+            [(ten_diem, *vn2000_to_wgs84_baibao(x, y, h, selected_lon0)) for ten_diem, x, y, h in parsed],
+            columns=["Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]
+        )
+        st.session_state.df = df
+        st.session_state.textout = "\n".join(
+            f"{row['Tên điểm']} {row['Vĩ độ (Lat)']} {row['Kinh độ (Lon)']} {row['H (m)']}"
+            for _, row in df.iterrows()
+        )
+        st.success(f"✅ Đã xử lý {len(df)} điểm hợp lệ.")
+    else:
+        if 'errors' in locals() and errors:
             st.error(f"🚨 Có {len(errors)} dòng lỗi:")
             df_errors = pd.DataFrame(errors, columns=["Tên điểm", "X", "Y", "H"])
             st.dataframe(df_errors.style.set_properties(**{'background-color': 'pink'}))
+
+with tab2:
 with tab2:
     st.subheader("WGS84 ➔ VN2000")
     selected_display = st.selectbox("Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_wgs84")
