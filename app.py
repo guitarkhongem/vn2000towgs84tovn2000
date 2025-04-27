@@ -153,21 +153,21 @@ if "df" in st.session_state:
             mime="application/vnd.google-earth.kml+xml"
         )
 
-    if {"Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
-        st.markdown("### 🌍 Bản đồ vệ tinh")
+if {"Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
+    st.markdown("### 🌍 Bản đồ vệ tinh")
 
-        # --- Fix chiều cao gọn 550px cho Folium ---
-        st.markdown("""
-        <style>
-        div[data-testid="stVerticalBlock"] > div:nth-child(1) > div {
-            padding-bottom: 0px;
-            height: auto;
-        }
-        </style>
-        """, unsafe_allow_html=True)
+    # --- Ép cứng height cho iframe Folium ---
+    st.markdown("""
+    <style>
+    iframe {
+        height: 550px !important;
+        min-height: 550px !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-        m = generate_map(df)
-        with st.container():
-            st_folium(m, width="100%", height=550)
+    m = generate_map(df)
+    st_folium(m, width="100%", height=550)
+
 
 show_footer()
