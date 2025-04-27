@@ -113,8 +113,6 @@ with tab1:
             st.error(f"🚨 Có {len(errors)} dòng lỗi:")
             df_errors = pd.DataFrame(errors, columns=["Tên điểm", "X", "Y", "H"])
             st.dataframe(df_errors.style.set_properties(**{'background-color': 'pink'}))
-
-with tab2:
 with tab2:
     st.subheader("WGS84 ➔ VN2000")
     selected_display = st.selectbox("Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_wgs84")
