@@ -100,7 +100,7 @@ with tab2:
     st.markdown("#### Nhập toạ độ WGS84 (Lat Lon H)")
     coords_input = st.text_area("Mỗi dòng một giá trị", height=180, key="wgs84input")
 
-    uploaded_file_wgs84 = st.file_uploader("\ud83d\udcc2 Hoặc upload file TXT/CSV", type=["txt", "csv"], key="upload_wgs84")
+    uploaded_file_wgs84 = st.file_uploader("📂 Hoặc upload file TXT/CSV", type=["txt", "csv"], key="upload_wgs84")
     if uploaded_file_wgs84:
         try:
             df_uploaded = pd.read_csv(uploaded_file_wgs84, delim_whitespace=True, header=None)
