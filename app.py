@@ -36,7 +36,7 @@ with col1:
     st.image("assets/logo.jpg", width=90)
 with col2:
     st.title("VN2000 ⇄ WGS84 Converter")
-    st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA")
+    st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚng Hóa")
 
 # Danh sách kinh tuyến trục
 lon0_choices = {
@@ -59,7 +59,6 @@ lon0_choices = {
 
 lon0_display = [f"{lon} – {province}" for lon, province in lon0_choices.items()]
 default_index = list(lon0_choices.keys()).index(106.25)
-
 # Upload file chung
 st.markdown("## 📤 Upload hoặc nhập dữ liệu toạ độ")
 
@@ -67,9 +66,9 @@ uploaded_file = st.file_uploader("Tải file TXT hoặc CSV", type=["txt", "csv"
 
 if uploaded_file is not None:
     content = uploaded_file.read().decode("utf-8")
-    coords_input = st.text_area("Nội dung toạ độ", value=content, height=180, key="coords_input")
+    coords_input = st.text_area("Mỗi dòng một giá trị", value=content, height=180, key="coords_input")
 else:
-    coords_input = st.text_area("Nội dung toạ độ", height=180, key="coords_input")
+    coords_input = st.text_area("Mỗi dòng một giá trị", height=180, key="coords_input")
 
 # Tabs
 tab1, tab2 = st.tabs(["VN2000 ➔ WGS84", "WGS84 ➔ VN2000"])
@@ -78,6 +77,9 @@ with tab1:
     st.subheader("VN2000 ➔ WGS84")
     selected_display = st.selectbox("Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_vn2000")
     selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
+
+    st.markdown("#### Nhập toạ độ VN2000 (X Y H hoặc mã hiệu E/N)")
+    coords_input = st.text_area("Mỗi dòng một giá trị", height=180)
 
     if st.button("Chuyển sang WGS84"):
         parsed, errors = parse_coordinates(coords_input)
@@ -105,6 +107,9 @@ with tab2:
     st.subheader("WGS84 ➔ VN2000")
     selected_display = st.selectbox("Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_wgs84")
     selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
+
+    st.markdown("#### Nhập toạ độ WGS84 (Lat Lon H)")
+    coords_input = st.text_area("Mỗi dòng một giá trị", height=180, key="wgs84input")
 
     if st.button("Chuyển sang VN2000"):
         tokens = re.split(r'[\s\n]+', coords_input.strip())
