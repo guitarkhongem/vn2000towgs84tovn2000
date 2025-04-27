@@ -20,12 +20,11 @@ from functions.mapgen import generate_map
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
 set_background("assets/background.png")
 
-# --- CSS chỉnh màu chữ nút thành đỏ đậm ---
 st.markdown("""
 <style>
 div.stButton > button, div.stDownloadButton > button {
-    color: #B30000;
-    font-weight: bold;
+color: #B30000;
+font-weight: bold;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -38,7 +37,7 @@ with col2:
     st.title("VN2000 ⇄ WGS84 Converter")
     st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA")
 
-# Danh sách kinh tuyến trục
+# Kinh tuyến trục
 lon0_choices = {
     104.5: "Kiên Giang, Cà Mau",
     104.75: "Lào Cai, Phú Thọ, Nghệ An, An Giang",
@@ -68,7 +67,7 @@ with tab1:
     selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
 
     uploaded_file_vn2000 = st.file_uploader("📂 Upload file TXT/CSV", type=["txt", "csv"], key="upload_vn2000")
-    
+
     parsed, errors = [], []
     if uploaded_file_vn2000:
         content = uploaded_file_vn2000.read().decode("utf-8")
@@ -82,21 +81,21 @@ with tab1:
         if not parsed:
             parsed, errors = parse_coordinates(coords_input)
 
-    if parsed:
-        df = pd.DataFrame(
-            [(ten_diem, *vn2000_to_wgs84_baibao(x, y, h, selected_lon0)) for ten_diem, x, y, h in parsed],
-            columns=["Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]
-        )
-        st.session_state.df = df
-        st.session_state.textout = "\n".join(
-            f"{row['Tên điểm']} {row['Vĩ độ (Lat)']} {row['Kinh độ (Lon)']} {row['H (m)']}"
-            for _, row in df.iterrows()
-        )
-        st.success(f"✅ Đã xử lý {len(df)} điểm hợp lệ.")
-    elif errors:
-        st.error(f"🚨 Có {len(errors)} dòng lỗi:")
-        df_errors = pd.DataFrame(errors, columns=["Tên điểm", "X", "Y", "H"])
-        st.dataframe(df_errors.style.set_properties(**{'background-color': 'pink'}))
+        if parsed:
+            df = pd.DataFrame(
+                [(ten_diem, *vn2000_to_wgs84_baibao(x, y, h, selected_lon0)) for ten_diem, x, y, h in parsed],
+                columns=["Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]
+            )
+            st.session_state.df = df
+            st.session_state.textout = "\n".join(
+                f"{row['Tên điểm']} {row['Vĩ độ (Lat)']} {row['Kinh độ (Lon)']} {row['H (m)']}"
+                for _, row in df.iterrows()
+            )
+            st.success(f"✅ Đã xử lý {len(df)} điểm hợp lệ.")
+        elif errors:
+            st.error(f"🚨 Có {len(errors)} dòng lỗi:")
+            df_errors = pd.DataFrame(errors, columns=["Tên điểm", "X", "Y", "H"])
+            st.dataframe(df_errors.style.set_properties(**{'background-color': 'pink'}))
 
 with tab2:
     st.subheader("WGS84 ➔ VN2000")
@@ -104,7 +103,6 @@ with tab2:
     selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
 
     uploaded_file_wgs84 = st.file_uploader("📂 Upload file TXT/CSV", type=["txt", "csv"], key="upload_wgs84")
-
     if uploaded_file_wgs84:
         content_wgs84 = uploaded_file_wgs84.read().decode("utf-8")
         coords_input_wgs84 = st.text_area("Nội dung file:", content_wgs84, height=180)
@@ -129,17 +127,17 @@ with tab2:
             if len(chunk) == 3:
                 parsed_wgs84.append(chunk)
 
-    if parsed_wgs84:
-        df = pd.DataFrame(
-            [wgs84_to_vn2000_baibao(lat, lon, h, selected_lon0) for lat, lon, h in parsed_wgs84],
-            columns=["X (m)", "Y (m)", "H (m)"]
-        )
-        st.session_state.df = df
-        st.session_state.textout = "\n".join(
-            f"{row['X (m)']} {row['Y (m)']} {row['H (m)']}"
-            for _, row in df.iterrows()
-        )
-        st.success(f"✅ Đã xử lý {len(df)} điểm.")
+        if parsed_wgs84:
+            df = pd.DataFrame(
+                [wgs84_to_vn2000_baibao(lat, lon, h, selected_lon0) for lat, lon, h in parsed_wgs84],
+                columns=["X (m)", "Y (m)", "H (m)"]
+            )
+            st.session_state.df = df
+            st.session_state.textout = "\n".join(
+                f"{row['X (m)']} {row['Y (m)']} {row['H (m)']}"
+                for _, row in df.iterrows()
+            )
+            st.success(f"✅ Đã xử lý {len(df)} điểm.")
 
 if "df" in st.session_state:
     df = st.session_state.df
@@ -175,7 +173,6 @@ if "df" in st.session_state:
         }
         </style>
         """, unsafe_allow_html=True)
-
         m = generate_map(df)
         st_folium(m, width="100%", height=550)
 
