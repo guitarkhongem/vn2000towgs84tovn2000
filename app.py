@@ -19,12 +19,13 @@ from functions.mapgen import generate_map
 # Setup page
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
 set_background("assets/background.png")
+
 # --- CSS chỉnh màu chữ nút thành đỏ đậm ---
 st.markdown("""
 <style>
 div.stButton > button, div.stDownloadButton > button {
-    color: #B30000;
-    font-weight: bold;
+color: #B30000;
+font-weight: bold;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -35,7 +36,7 @@ with col1:
     st.image("assets/logo.jpg", width=90)
 with col2:
     st.title("VN2000 ⇄ WGS84 Converter")
-    st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA")
+    st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚng Hóa")
 
 # Danh sách kinh tuyến trục
 lon0_choices = {
@@ -60,7 +61,7 @@ lon0_display = [f"{lon} – {province}" for lon, province in lon0_choices.items(
 default_index = list(lon0_choices.keys()).index(106.25)
 
 # Tabs
-tab1, tab2 = st.tabs(["VN2000 → WGS84", "WGS84 → VN2000"])
+tab1, tab2 = st.tabs(["VN2000 ➔ WGS84", "WGS84 ➔ VN2000"])
 
 with tab1:
     st.subheader("VN2000 ➔ WGS84")
@@ -71,7 +72,8 @@ with tab1:
     coords_input = st.text_area("Mỗi dòng một giá trị", height=180)
 
     if st.button("Chuyển sang WGS84"):
-        parsed = parse_coordinates(coords_input)
+        parsed, errors = parse_coordinates(coords_input)
+
         if parsed:
             df = pd.DataFrame(
                 [(ten_diem, *vn2000_to_wgs84_baibao(x, y, h, selected_lon0)) for ten_diem, x, y, h in parsed],
@@ -82,9 +84,14 @@ with tab1:
                 f"{row['Tên điểm']} {row['Vĩ độ (Lat)']} {row['Kinh độ (Lon)']} {row['H (m)']}"
                 for _, row in df.iterrows()
             )
-            st.success(f"Đã xử lý {len(df)} điểm.")
+            st.success(f"✅ Đã xử lý {len(df)} điểm hợp lệ.")
         else:
-            st.error("Không có dữ liệu hợp lệ!")
+            st.error("⚠️ Không có dữ liệu hợp lệ!")
+
+        if errors:
+            st.error(f"🚨 Có {len(errors)} dòng lỗi:")
+            df_errors = pd.DataFrame(errors, columns=["Tên điểm", "X", "Y", "H"])
+            st.dataframe(df_errors.style.set_properties(**{'background-color': 'pink'}))
 
 with tab2:
     st.subheader("WGS84 ➔ VN2000")
