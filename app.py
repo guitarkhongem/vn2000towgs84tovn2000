@@ -67,7 +67,7 @@ with tab1:
     selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
 
     uploaded_file_vn2000 = st.file_uploader("📂 Upload file TXT/CSV", type=["txt", "csv"], key="upload_vn2000")
-    
+
     if uploaded_file_vn2000:
         content = uploaded_file_vn2000.read().decode("utf-8")
         coords_input = st.text_area("Nội dung file:", content, height=180)
@@ -99,6 +99,7 @@ with tab2:
     selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
 
     uploaded_file_wgs84 = st.file_uploader("📂 Upload file TXT/CSV", type=["txt", "csv"], key="upload_wgs84")
+
     if uploaded_file_wgs84:
         content_wgs84 = uploaded_file_wgs84.read().decode("utf-8")
         coords_input_wgs84 = st.text_area("Nội dung file:", content_wgs84, height=180)
