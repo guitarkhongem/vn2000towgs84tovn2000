@@ -23,12 +23,11 @@ set_background("assets/background.png")
 st.markdown("""
 <style>
 div.stButton > button, div.stDownloadButton > button {
-    color: #FFFFFF;  /* Màu trắng */
+    color: #B30000;
     font-weight: bold;
 }
 </style>
 """, unsafe_allow_html=True)
-
 
 # Header
 col1, col2 = st.columns([1, 5])
