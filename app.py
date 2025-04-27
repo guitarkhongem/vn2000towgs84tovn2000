@@ -23,8 +23,8 @@ set_background("assets/background.png")
 st.markdown("""
 <style>
 div.stButton > button, div.stDownloadButton > button {
-color: #B30000;
-font-weight: bold;
+    color: #B30000;
+    font-weight: bold;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -67,19 +67,15 @@ with tab1:
     selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
 
     uploaded_file_vn2000 = st.file_uploader("📂 Upload file TXT/CSV", type=["txt", "csv"], key="upload_vn2000")
-
-    parsed, errors = [], []
+    
     if uploaded_file_vn2000:
         content = uploaded_file_vn2000.read().decode("utf-8")
         coords_input = st.text_area("Nội dung file:", content, height=180)
-        if content.strip():
-            parsed, errors = parse_coordinates(content)
     else:
         coords_input = st.text_area("Nhập toạ độ VN2000 (X Y H hoặc mã hiệu E/N):", height=180)
 
     if st.button("Chuyển sang WGS84"):
-        if not parsed:
-            parsed, errors = parse_coordinates(coords_input)
+        parsed, errors = parse_coordinates(coords_input)
 
         if parsed:
             df = pd.DataFrame(
@@ -109,8 +105,8 @@ with tab2:
     else:
         coords_input_wgs84 = st.text_area("Nhập toạ độ WGS84 (Lat Lon H):", height=180, key="wgs84input")
 
-    parsed_wgs84 = []
     if st.button("Chuyển sang VN2000"):
+        parsed_wgs84 = []
         tokens = re.split(r'[\s\n]+', coords_input_wgs84.strip())
         i = 0
         while i < len(tokens):
@@ -139,6 +135,7 @@ with tab2:
             )
             st.success(f"✅ Đã xử lý {len(df)} điểm.")
 
+# Hiển thị kết quả
 if "df" in st.session_state:
     df = st.session_state.df
     st.markdown("### 📊 Kết quả")
