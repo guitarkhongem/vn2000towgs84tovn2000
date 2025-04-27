@@ -64,6 +64,6 @@ def parse_coordinates(text):
     # --- Lọc hợp lệ ---
     filtered = []
     for ten_diem, x, y, h in coords:
-        if 1_000_000 <= x <= 2_000_000 and 330_000 <= y <= 670_000 and -1000 <= h <= 3200:
+        if 500_000 <= x <= 2_650_000 and 330_000 <= y <= 670_000 and -1000 <= h <= 3200:
             filtered.append([ten_diem, x, y, h])
     return filtered
