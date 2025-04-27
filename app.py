@@ -67,7 +67,7 @@ with tab1:
     selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
 
     uploaded_file_vn2000 = st.file_uploader("📂 Upload file TXT/CSV", type=["txt", "csv"], key="upload_vn2000")
-
+    
     if uploaded_file_vn2000:
         content = uploaded_file_vn2000.read().decode("utf-8")
         coords_input = st.text_area("Nội dung file:", content, height=180)
@@ -78,16 +78,19 @@ with tab1:
         parsed, errors = parse_coordinates(coords_input)
 
         if parsed:
-            df = pd.DataFrame(
-                [(ten_diem, *vn2000_to_wgs84_baibao(x, y, h, selected_lon0)) for ten_diem, x, y, h in parsed],
-                columns=["Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]
-            )
-            st.session_state.df = df
-            st.session_state.textout = "\n".join(
-                f"{row['Tên điểm']} {row['Vĩ độ (Lat)']} {row['Kinh độ (Lon)']} {row['H (m)']}"
-                for _, row in df.iterrows()
-            )
-            st.success(f"✅ Đã xử lý {len(df)} điểm hợp lệ.")
+            try:
+                df = pd.DataFrame(
+                    [(ten_diem, *vn2000_to_wgs84_baibao(x, y, h, selected_lon0)) for ten_diem, x, y, h in parsed],
+                    columns=["Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]
+                )
+                st.session_state.df = df
+                st.session_state.textout = "\n".join(
+                    f"{row['Tên điểm']} {row['Vĩ độ (Lat)']} {row['Kinh độ (Lon)']} {row['H (m)']}"
+                    for _, row in df.iterrows()
+                )
+                st.success(f"✅ Đã xử lý {len(df)} điểm hợp lệ.")
+            except Exception as e:
+                st.error(f"🚨 Dữ liệu lỗi không đúng định dạng: {e}")
         elif errors:
             st.error(f"🚨 Có {len(errors)} dòng lỗi:")
             df_errors = pd.DataFrame(errors, columns=["Tên điểm", "X", "Y", "H"])
