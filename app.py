@@ -51,17 +51,17 @@ lon0_display = [f"{lon} – {province}" for lon, province in lon0_choices.items(
 default_index = list(lon0_choices.keys()).index(106.25)
 
 # Tabs
-tab1, tab2 = st.tabs(["➞ VN2000 → WGS84", "⭮ WGS84 → VN2000"])
+tab1, tab2 = st.tabs(["VN2000 → WGS84", "WGS84 → VN2000"])
 
 with tab1:
-    st.subheader("➞ VN2000 ➔ WGS84")
-    selected_display = st.selectbox("\ud83e\udeed Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_vn2000")
+    st.subheader("VN2000 ➔ WGS84")
+    selected_display = st.selectbox("Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_vn2000")
     selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
 
-    st.markdown("#### \ud83d\udcdd Nhập toạ độ VN2000 (X Y H hoặc mã hiệu E/N)")
+    st.markdown("#### Nhập toạ độ VN2000 (X Y H hoặc mã hiệu E/N)")
     coords_input = st.text_area("Mỗi dòng một giá trị", height=180)
 
-    if st.button("\ud83d\udd01 Chuyển sang WGS84"):
+    if st.button("Chuyển sang WGS84"):
         parsed = parse_coordinates(coords_input)
         if parsed:
             df = pd.DataFrame(
@@ -73,19 +73,19 @@ with tab1:
                 f"{row['Tên điểm']} {row['Vĩ độ (Lat)']} {row['Kinh độ (Lon)']} {row['H (m)']}"
                 for _, row in df.iterrows()
             )
-            st.success(f"✅ Đã xử lý {len(df)} điểm.")
+            st.success(f"Đã xử lý {len(df)} điểm.")
         else:
-            st.error("⚠️ Không có dữ liệu hợp lệ!")
+            st.error("Không có dữ liệu hợp lệ!")
 
 with tab2:
-    st.subheader("⭮ WGS84 ➔ VN2000")
-    selected_display = st.selectbox("\ud83e\udeed Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_wgs84")
+    st.subheader("WGS84 ➔ VN2000")
+    selected_display = st.selectbox("Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_wgs84")
     selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
 
-    st.markdown("#### \ud83d\udcdd Nhập toạ độ WGS84 (Lat Lon H)")
+    st.markdown("#### Nhập toạ độ WGS84 (Lat Lon H)")
     coords_input = st.text_area("Mỗi dòng một giá trị", height=180, key="wgs84input")
 
-    if st.button("\ud83d\udd01 Chuyển sang VN2000"):
+    if st.button("Chuyển sang VN2000"):
         tokens = re.split(r'[\s\n]+', coords_input.strip())
         coords = []
         i = 0
@@ -115,20 +115,20 @@ with tab2:
                 f"{row['Tên điểm']} {row['X (m)']} {row['Y (m)']} {row['h (m)']}"
                 for _, row in df.iterrows()
             )
-            st.success(f"✅ Đã xử lý {len(df)} điểm.")
+            st.success(f"Đã xử lý {len(df)} điểm.")
         else:
-            st.error("⚠️ Không có dữ liệu hợp lệ!")
+            st.error("Không có dữ liệu hợp lệ!")
 
 if "df" in st.session_state:
     df = st.session_state.df
-    st.markdown("### 📊 Kết quả")
+    st.markdown("### Kết quả")
     st.dataframe(df)
 
-    st.markdown("### 📝 Kết quả Text")
+    st.markdown("### Kết quả Text")
     st.text_area("Kết quả:", st.session_state.get("textout", ""), height=250)
 
     st.download_button(
-        label="📅 Tải xuống CSV",
+        label="Tải xuống CSV",
         data=df.to_csv(index=False).encode("utf-8"),
         file_name="converted_points.csv",
         mime="text/csv"
@@ -137,14 +137,14 @@ if "df" in st.session_state:
     kml = df_to_kml(df)
     if kml:
         st.download_button(
-            label="📅 Tải xuống KML",
+            label="Tải xuống KML",
             data=kml,
             file_name="converted_points.kml",
             mime="application/vnd.google-earth.kml+xml"
         )
 
     if isinstance(df, pd.DataFrame) and {"Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
-        st.markdown("### 🌍 Bản đồ vệ tinh")
+        st.markdown("### Bản đồ vệ tinh")
 
         st.markdown("""
         <style>
