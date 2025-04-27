@@ -26,7 +26,7 @@ with col1:
     st.image("assets/logo.jpg", width=90)
 with col2:
     st.title("VN2000 ⇄ WGS84 Converter")
-    st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA")
+    st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚng Hóa")
 
 # Danh sách kinh tuyến trục
 lon0_choices = {
@@ -55,18 +55,13 @@ tab1, tab2 = st.tabs(["➞ VN2000 → WGS84", "⭮ WGS84 → VN2000"])
 
 with tab1:
     st.subheader("➞ VN2000 ➔ WGS84")
-    selected_display = st.selectbox(
-        "🫭 Chọn kinh tuyến trục",
-        options=lon0_display,
-        index=default_index,
-        key="lon0_vn2000"
-    )
+    selected_display = st.selectbox("\ud83e\udeed Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_vn2000")
     selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
 
-    st.markdown("#### 📝 Nhập toạ độ VN2000 (X Y H hoặc mã hiệu E/N)")
+    st.markdown("#### \ud83d\udcdd Nhập toạ độ VN2000 (X Y H hoặc mã hiệu E/N)")
     coords_input = st.text_area("Mỗi dòng một giá trị", height=180)
 
-    if st.button("🔁 Chuyển sang WGS84"):
+    if st.button("\ud83d\udd01 Chuyển sang WGS84"):
         parsed = parse_coordinates(coords_input)
         if parsed:
             df = pd.DataFrame(
@@ -84,18 +79,13 @@ with tab1:
 
 with tab2:
     st.subheader("⭮ WGS84 ➔ VN2000")
-    selected_display = st.selectbox(
-        "🫭 Chọn kinh tuyến trục",
-        options=lon0_display,
-        index=default_index,
-        key="lon0_wgs84"
-    )
+    selected_display = st.selectbox("\ud83e\udeed Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_wgs84")
     selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
 
-    st.markdown("#### 📝 Nhập toạ độ WGS84 (Lat Lon H)")
+    st.markdown("#### \ud83d\udcdd Nhập toạ độ WGS84 (Lat Lon H)")
     coords_input = st.text_area("Mỗi dòng một giá trị", height=180, key="wgs84input")
 
-    if st.button("🔁 Chuyển sang VN2000"):
+    if st.button("\ud83d\udd01 Chuyển sang VN2000"):
         tokens = re.split(r'[\s\n]+', coords_input.strip())
         coords = []
         i = 0
@@ -134,11 +124,11 @@ if "df" in st.session_state:
     st.markdown("### 📊 Kết quả")
     st.dataframe(df)
 
-    st.markdown("### 📄 Kết quả Text")
+    st.markdown("### 📝 Kết quả Text")
     st.text_area("Kết quả:", st.session_state.get("textout", ""), height=250)
 
     st.download_button(
-        label="📥 Tải CSV",
+        label="📅 Tải xuống CSV",
         data=df.to_csv(index=False).encode("utf-8"),
         file_name="converted_points.csv",
         mime="text/csv"
@@ -147,7 +137,7 @@ if "df" in st.session_state:
     kml = df_to_kml(df)
     if kml:
         st.download_button(
-            label="📥 Tải KML",
+            label="📅 Tải xuống KML",
             data=kml,
             file_name="converted_points.kml",
             mime="application/vnd.google-earth.kml+xml"
@@ -156,18 +146,16 @@ if "df" in st.session_state:
     if isinstance(df, pd.DataFrame) and {"Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
         st.markdown("### 🌍 Bản đồ vệ tinh")
 
-        st.markdown(\"\"\"
+        st.markdown("""
         <style>
         iframe {
             height: 550px !important;
             min-height: 550px !important;
         }
         </style>
-        \"\"\", unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
         m = generate_map(df)
         st_folium(m, width="100%", height=550)
-
-
 
 show_footer()
