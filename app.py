@@ -70,6 +70,62 @@ with col1:
         coords_input = st.text_area("Nội dung toạ độ", height=180, key="coords_input")
 
     selected_display = st.selectbox("🧭 Chọn kinh tuyến trục", options=lon0_display, index=default_index)
+st.markdown("### 🔄 Chuyển đổi toạ độ")
+
+tab1, tab2 = st.tabs(["VN2000 ➔ WGS84", "WGS84 ➔ VN2000"])
+
+with tab1:
+    if st.button("➡️ Chuyển sang WGS84"):
+        parsed, errors = parse_coordinates(coords_input)
+
+        if parsed:
+            df = pd.DataFrame(
+                [(ten_diem, *vn2000_to_wgs84_baibao(x, y, h, float(selected_display.split('–')[0].strip()))) for ten_diem, x, y, h in parsed],
+                columns=["Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]
+            )
+            st.session_state.df = df
+            st.session_state.textout = "\n".join(
+                f"{row['Tên điểm']} {row['Vĩ độ (Lat)']} {row['Kinh độ (Lon)']} {row['H (m)']}"
+                for _, row in df.iterrows()
+            )
+            st.success(f"✅ Đã xử lý {len(df)} điểm hợp lệ.")
+        else:
+            st.error("⚠️ Không có dữ liệu hợp lệ!")
+
+with tab2:
+    if st.button("⬅️ Chuyển sang VN2000"):
+        tokens = re.split(r'[\s\n]+', coords_input.strip())
+        coords = []
+        i = 0
+        while i < len(tokens):
+            chunk = []
+            for _ in range(3):
+                if i < len(tokens):
+                    try:
+                        chunk.append(float(tokens[i].replace(",", ".")))
+                    except:
+                        break
+                    i += 1
+            if len(chunk) == 2:
+                chunk.append(0.0)
+            if len(chunk) == 3:
+                coords.append(chunk)
+            else:
+                i += 1
+
+        if coords:
+            df = pd.DataFrame(
+                [("", *wgs84_to_vn2000_baibao(lat, lon, h, float(selected_display.split('–')[0].strip()))) for lat, lon, h in coords],
+                columns=["Tên điểm", "X (m)", "Y (m)", "h (m)"]
+            )
+            st.session_state.df = df
+            st.session_state.textout = "\n".join(
+                f"{row['Tên điểm']} {row['X (m)']} {row['Y (m)']} {row['h (m)']}"
+                for _, row in df.iterrows()
+            )
+            st.success(f"✅ Đã xử lý {len(df)} điểm.")
+        else:
+            st.error("⚠️ Không có dữ liệu hợp lệ!")
 
 with col2:
     st.markdown("### 📊 Kết quả")
