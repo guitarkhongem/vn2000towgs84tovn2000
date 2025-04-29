@@ -109,7 +109,7 @@ with col_map:
     if "df" in st.session_state:
         df_sorted = st.session_state.df.sort_values(by="Tên điểm", ascending=True)
 
-        map_type = st.selectbox("🌍 Chế độ bản đồ", options=["Giao Thông", "Vệ tinh"], index=0)
+        map_type = st.selectbox("", options=["Giao Thông", "Vệ tinh"], index=0)
         tileset = "OpenStreetMap" if map_type == "Giao Thông" else "Esri.WorldImagery"
 
         if "join_points" not in st.session_state:
