@@ -34,7 +34,7 @@ with col1:
     st.image("assets/logo.jpg", width=90)
 with col2:
     st.title("VN2000 ⇄ WGS84 Converter")
-    st.markdown("### BẤT ĐỘNG SẢN HUYẾN HƯỚNG HÓA")
+    st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA")
 
 lon0_choices = {
     104.5: "Kiên Giang, Cà Mau",
@@ -96,7 +96,7 @@ with col2:
                     mime="application/vnd.google-earth.kml+xml"
                 )
         with col_maptype:
-            map_type = st.selectbox("🗺️ Chế độ", options=["Mặc định", "Vệ tinh"], index=0, key="map_type")
+            map_type = st.selectbox(options=["Giao Thông", "Vệ tinh"], index=0, key="map_type")
         with col_join:
             if "join_points" not in st.session_state:
                 st.session_state.join_points = False
