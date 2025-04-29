@@ -1,3 +1,4 @@
+from shapely.geometry import Polygon, LineString
 import sys
 import os
 sys.path.append(os.path.dirname(__file__))
@@ -141,6 +142,18 @@ with tab2:
             st.error("Không có dữ liệu hợp lệ!")
 
 if "df" in st.session_state:
+    if isinstance(df, pd.DataFrame) and {"Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
+    points = [(row["Kinh độ (Lon)"], row["Vĩ độ (Lat)"]) for _, row in df.iterrows()]
+    if len(points) >= 3:
+        # Khép kín polygon
+        if points[0] != points[-1]:
+            points.append(points[0])
+        polygon = Polygon(points)
+        st.markdown(f"### ➡️ Diện tích (WGS84, tính gần đúng): `{polygon.area:.6f}` độ vuông")
+        st.map(pd.DataFrame(points, columns=["lon", "lat"]))  # Vẽ các điểm nối lại
+    else:
+        line = LineString(points)
+        st.markdown(f"### ➡️ Chiều dài đường nối: `{line.length:.6f}` độ (trên hệ WGS84)")
     df = st.session_state.df
     st.markdown("### Kết quả")
     st.dataframe(df)
