@@ -65,13 +65,15 @@ col_left, col_right = st.columns([1, 2])
 
 with col_left:
     st.markdown("## 📄 Upload hoặc nhập toạ độ")
-    uploaded_file = st.file_uploader("Tải file TXT hoặc CSV", type=["txt", "csv"], key="upload_common")
+    uploaded_file = st.file_uploader("Tải file TXT hoặc CSV", type=["txt", "csv"])
 
-    if uploaded_file is not None:
-        content = uploaded_file.read().decode("utf-8")
-        coords_input = st.text_area("Nội dung toạ độ", value=content, height=180, key="coords_input")
-    else:
-        coords_input = st.text_area("Nội dung toạ độ", height=180, key="coords_input")
+if uploaded_file is not None:
+    content = uploaded_file.read().decode("utf-8")
+else:
+    content = ""
+
+coords_input = st.text_area("Nội dung toạ độ", value=content, height=180)
+
 
     selected_display = st.selectbox("🧭️ Chọn kinh tuyến trục", options=lon0_display, index=default_index)
 
