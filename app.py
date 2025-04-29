@@ -147,14 +147,11 @@ if "df" in st.session_state:
     if isinstance(df, pd.DataFrame) and {"Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
         df_sorted = df.sort_values(by="Tên điểm", ascending=True)
 
-        # Button: Nối điểm
         join_points = st.button("🔵 Nối các điểm thành đường khép kín")
 
-        # Tạo map
         m = folium.Map(location=[df_sorted.iloc[0]["Vĩ độ (Lat)"], df_sorted.iloc[0]["Kinh độ (Lon)"]], zoom_start=15)
 
         if join_points:
-            # Khi bấm nút Nối điểm
             points = [(row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]) for _, row in df_sorted.iterrows()]
             if points[0] != points[-1]:
                 points.append(points[0])
@@ -166,8 +163,7 @@ if "df" in st.session_state:
                 tooltip="Polygon khép kín"
             ).add_to(m)
 
-            # Vẽ dấu chấm nhỏ
-            for lat, lon in points[:-1]:  # bỏ điểm lặp lại
+            for lat, lon in points[:-1]:  # Bỏ điểm trùng lặp cuối
                 folium.CircleMarker(
                     location=[lat, lon],
                     radius=2,
@@ -177,7 +173,6 @@ if "df" in st.session_state:
                 ).add_to(m)
 
         else:
-            # Chế độ xem từng điểm
             for _, row in df_sorted.iterrows():
                 folium.Marker(
                     location=[row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]],
