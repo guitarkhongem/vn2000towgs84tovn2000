@@ -1,13 +1,13 @@
-from shapely.geometry import Polygon, LineString
 import sys
 import os
 sys.path.append(os.path.dirname(__file__))
 
 import streamlit as st
-import folium
 import pandas as pd
 import re
+import folium
 from streamlit_folium import st_folium
+from shapely.geometry import Polygon, LineString
 import logger
 logger.log_visit()
 
@@ -142,17 +142,56 @@ with tab2:
         else:
             st.error("Không có dữ liệu hợp lệ!")
 
+# Hiển thị kết quả
 if "df" in st.session_state:
     df = st.session_state.df
 
-    if isinstance(df, pd.DataFrame) and {"Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
+    st.markdown("### Kết quả")
+    st.dataframe(df)
+
+    st.markdown("### Kết quả Text")
+    st.text_area("Kết quả:", st.session_state.get("textout", ""), height=250)
+
+    st.download_button(
+        label="Tải xuống CSV",
+        data=df.to_csv(index=False).encode("utf-8"),
+        file_name="converted_points.csv",
+        mime="text/csv"
+    )
+
+    kml = df_to_kml(df)
+    if kml:
+        st.download_button(
+            label="Tải xuống KML",
+            data=kml,
+            file_name="converted_points.kml",
+            mime="application/vnd.google-earth.kml+xml"
+        )
+
+    if {"Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
         df_sorted = df.sort_values(by="Tên điểm", ascending=True)
 
-        join_points = st.button("🔵 Nối các điểm thành đường khép kín")
+        map_type = st.selectbox(
+            "🗺️ Chọn chế độ bản đồ:",
+            options=["Mặc định", "Vệ tinh"],
+            index=0
+        )
 
-        m = folium.Map(location=[df_sorted.iloc[0]["Vĩ độ (Lat)"], df_sorted.iloc[0]["Kinh độ (Lon)"]], zoom_start=15)
+        if map_type == "Mặc định":
+            tileset = "OpenStreetMap"
+        else:
+            tileset = "Esri.WorldImagery"
 
-        if join_points:
+        if "join_points" not in st.session_state:
+            st.session_state.join_points = False
+
+        if st.button("🔵 Nối các điểm thành đường khép kín"):
+            st.session_state.join_points = not st.session_state.join_points
+
+        m = folium.Map(location=[df_sorted.iloc[0]["Vĩ độ (Lat)"], df_sorted.iloc[0]["Kinh độ (Lon)"]],
+                       zoom_start=15, tiles=tileset)
+
+        if st.session_state.join_points:
             points = [(row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]) for _, row in df_sorted.iterrows()]
             if points[0] != points[-1]:
                 points.append(points[0])
@@ -164,7 +203,7 @@ if "df" in st.session_state:
                 tooltip="Polygon khép kín"
             ).add_to(m)
 
-            for lat, lon in points[:-1]:  # Bỏ điểm trùng lặp cuối
+            for lat, lon in points[:-1]:
                 folium.CircleMarker(
                     location=[lat, lon],
                     radius=2,
@@ -172,17 +211,17 @@ if "df" in st.session_state:
                     fill=True,
                     fill_color='black'
                 ).add_to(m)
-
         else:
             for _, row in df_sorted.iterrows():
-                folium.Marker(
+                folium.CircleMarker(
                     location=[row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]],
-                    popup=row["Tên điểm"],
-                    icon=folium.Icon(color="red", icon="info-sign")
+                    radius=3,
+                    color='red',
+                    fill=True,
+                    fill_color='red'
                 ).add_to(m)
 
         st.markdown("### 🗺️ Bản đồ các điểm")
         st_folium(m, width="100%", height=600)
-
 
 show_footer()
