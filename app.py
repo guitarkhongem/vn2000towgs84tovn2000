@@ -62,22 +62,7 @@ lon0_choices = {
 lon0_display = [f"{lon} – {province}" for lon, province in lon0_choices.items()]
 default_index = list(lon0_choices.keys()).index(106.25)
 col_left, col_right = st.columns([1, 2])
-
-with col_left:
-    st.markdown("## 📄 Upload hoặc nhập toạ độ")
-    uploaded_file = st.file_uploader("Tải file TXT hoặc CSV", type=["txt", "csv"])
-
-    if uploaded_file is not None:
-        content = uploaded_file.read().decode("utf-8")
-    else:
-        content = ""
-
-    coords_input = st.text_area("Nội dung toạ độ", value=content, height=180)
-
-    selected_display = st.selectbox("🧭️ Chọn kinh tuyến trục", options=lon0_display, index=default_index)
-
-
-    st.markdown("### 🔄 Chuyển đổi toạ độ")
+  st.markdown("### 🔄 Chuyển đổi toạ độ")
     tab1, tab2 = st.tabs(["VN2000 ➔ WGS84", "WGS84 ➔ VN2000"])
 
     with tab1:
@@ -85,7 +70,7 @@ with col_left:
             parsed, errors = parse_coordinates(coords_input)
             if parsed:
                 df = pd.DataFrame(
-                    [(ten, *vn2000_to_wgs84_baibao(x, y, h, float(selected_display.split("–")[0].strip()))) for ten, x, y, h in parsed],
+                    [(ten, *vn2000_to_wgs84_baibao(x, y, h, float(selected_display.split(" –")[0]))) for ten, x, y, h in parsed],
                     columns=["Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]
                 )
                 st.session_state.df = df
@@ -98,6 +83,39 @@ with col_left:
                 st.error("⚠️ Không có dữ liệu hợp lệ!")
 
     with tab2:
+        if st.button("⬅️ Chuyển sang VN2000"):
+            tokens = re.split(r"[\s\n]+", coords_input.strip())
+            coords = []
+            i = 0
+            while i < len(tokens):
+                chunk = []
+                for _ in range(3):
+                    if i < len(tokens):
+                        try:
+                            chunk.append(float(tokens[i].replace(",", ".")))
+                        except:
+                            break
+                        i += 1
+                if len(chunk) == 2:
+                    chunk.append(0.0)
+                if len(chunk) == 3:
+                    coords.append(chunk)
+                else:
+                    i += 1
+
+            if coords:
+                df = pd.DataFrame(
+                    [("", *wgs84_to_vn2000_baibao(lat, lon, h, float(selected_display.split(" –")[0]))) for lat, lon, h in coords],
+                    columns=["Tên điểm", "X (m)", "Y (m)", "h (m)"]
+                )
+                st.session_state.df = df
+                st.session_state.textout = "\n".join(
+                    f"{row['Tên điểm']} {row['X (m)']} {row['Y (m)']} {row['h (m)']}"
+                    for _, row in df.iterrows()
+                )
+                st.success(f"✅ Đã xử lý {len(df)} điểm.")
+            else:
+                st.error("⚠️ Không có dữ liệu hợp lệ!")
         if st.button("⬅️ Chuyển sang VN2000"):
             tokens = re.split(r"[\s\n]+", coords_input.strip())
             coords = []
