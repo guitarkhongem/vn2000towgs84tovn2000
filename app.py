@@ -145,39 +145,47 @@ if "df" in st.session_state:
     df = st.session_state.df
 
     if isinstance(df, pd.DataFrame) and {"Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
-        # --- Sắp xếp theo Tên điểm ---
         df_sorted = df.sort_values(by="Tên điểm", ascending=True)
 
-        # --- Tạo list điểm ---
-        points = [(row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]) for _, row in df_sorted.iterrows()]
-        
-        # --- Khép kín polygon ---
-        if points[0] != points[-1]:
-            points.append(points[0])
+        # Button: Nối điểm
+        join_points = st.button("🔵 Nối các điểm thành đường khép kín")
 
-        import folium
-        from streamlit_folium import st_folium
+        # Tạo map
+        m = folium.Map(location=[df_sorted.iloc[0]["Vĩ độ (Lat)"], df_sorted.iloc[0]["Kinh độ (Lon)"]], zoom_start=15)
 
-        # Tạo Map centered vào điểm đầu tiên
-        m = folium.Map(location=[points[0][0], points[0][1]], zoom_start=15)
+        if join_points:
+            # Khi bấm nút Nối điểm
+            points = [(row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]) for _, row in df_sorted.iterrows()]
+            if points[0] != points[-1]:
+                points.append(points[0])
 
-        # Vẽ polygon (khép kín)
-        folium.PolyLine(
-            locations=points,
-            weight=4,
-            color="blue",
-            tooltip="Polygon khép kín"
-        ).add_to(m)
-
-        # Vẽ từng điểm marker
-        for idx, (lat, lon) in enumerate(points[:-1]):  # bỏ điểm cuối (vì là lặp lại)
-            folium.Marker(
-                location=[lat, lon],
-                popup=df_sorted.iloc[idx]["Tên điểm"],
-                icon=folium.Icon(color="red", icon="info-sign")
+            folium.PolyLine(
+                locations=points,
+                weight=3,
+                color="blue",
+                tooltip="Polygon khép kín"
             ).add_to(m)
 
-        st.markdown("### 📍 Đường nối khép kín các điểm")
+            # Vẽ dấu chấm nhỏ
+            for lat, lon in points[:-1]:  # bỏ điểm lặp lại
+                folium.CircleMarker(
+                    location=[lat, lon],
+                    radius=2,
+                    color='black',
+                    fill=True,
+                    fill_color='black'
+                ).add_to(m)
+
+        else:
+            # Chế độ xem từng điểm
+            for _, row in df_sorted.iterrows():
+                folium.Marker(
+                    location=[row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]],
+                    popup=row["Tên điểm"],
+                    icon=folium.Icon(color="red", icon="info-sign")
+                ).add_to(m)
+
+        st.markdown("### 🗺️ Bản đồ các điểm")
         st_folium(m, width="100%", height=600)
 
 
