@@ -57,9 +57,9 @@ lon0_choices = {
 lon0_display = [f"{lon} – {province}" for lon, province in lon0_choices.items()]
 default_index = list(lon0_choices.keys()).index(106.25)
 
-col_left, col_right = st.columns([1, 2])
+col1, col2 = st.columns([1, 2])
 
-with col_left:
+with col1:
     st.markdown("## 📄 Upload hoặc nhập toạ độ")
     uploaded_file = st.file_uploader("Tải file TXT hoặc CSV", type=["txt", "csv"], key="upload_common")
 
@@ -69,45 +69,46 @@ with col_left:
     else:
         coords_input = st.text_area("Nội dung toạ độ", height=180, key="coords_input")
 
-    selected_display = st.selectbox("🗭️ Chọn kinh tuyến trục", options=lon0_display, index=default_index)
+    selected_display = st.selectbox("🧭 Chọn kinh tuyến trục", options=lon0_display, index=default_index)
 
-with col_right:
+with col2:
     st.markdown("### 📊 Kết quả")
     if "df" in st.session_state:
         df = st.session_state.df
         st.dataframe(df)
         st.text_area("📄 Text kết quả", st.session_state.get("textout", ""), height=250)
 
-        st.download_button(
-            label="💾 Tải xuống CSV",
-            data=df.to_csv(index=False).encode("utf-8"),
-            file_name="converted_points.csv",
-            mime="text/csv"
-        )
-
-        kml = df_to_kml(df)
-        if kml:
+        col_csv, col_kml, col_maptype, col_join = st.columns(4)
+        with col_csv:
             st.download_button(
-                label="💾 Tải xuống KML",
-                data=kml,
-                file_name="converted_points.kml",
-                mime="application/vnd.google-earth.kml+xml"
+                label="💾 Tải CSV",
+                data=df.to_csv(index=False).encode("utf-8"),
+                file_name="converted_points.csv",
+                mime="text/csv"
             )
+        with col_kml:
+            kml = df_to_kml(df)
+            if kml:
+                st.download_button(
+                    label="💾 Tải KML",
+                    data=kml,
+                    file_name="converted_points.kml",
+                    mime="application/vnd.google-earth.kml+xml"
+                )
+        with col_maptype:
+            map_type = st.selectbox("🗺️ Chế độ", options=["Mặc định", "Vệ tinh"], index=0, key="map_type")
+        with col_join:
+            if "join_points" not in st.session_state:
+                st.session_state.join_points = False
+            if st.button("🔵 Nối điểm"):
+                st.session_state.join_points = not st.session_state.join_points
 
-    st.markdown("---")
-    st.markdown("### 🗺️ Bản đồ")
-    if "df" in st.session_state:
+        st.markdown("---")
+        st.markdown("### 🗺️ Bản đồ")
+
+        tileset = "OpenStreetMap" if st.session_state.get("map_type", "Mặc định") == "Mặc định" else "Esri.WorldImagery"
+
         df_sorted = df.sort_values(by="Tên điểm", ascending=True)
-
-        map_type = st.selectbox("Chọn chế độ bản đồ:", options=["Mặc định", "Vệ tinh"], index=0)
-        tileset = "OpenStreetMap" if map_type == "Mặc định" else "Esri.WorldImagery"
-
-        if "join_points" not in st.session_state:
-            st.session_state.join_points = False
-
-        if st.button("🔵 Nối các điểm"):
-            st.session_state.join_points = not st.session_state.join_points
-
         m = folium.Map(location=[df_sorted.iloc[0]["Vĩ độ (Lat)"], df_sorted.iloc[0]["Kinh độ (Lon)"]], zoom_start=15, tiles=tileset)
 
         if st.session_state.join_points:
@@ -141,5 +142,6 @@ with col_right:
                 ).add_to(m)
 
         st_folium(m, width="100%", height=750)
+
 
 show_footer()
