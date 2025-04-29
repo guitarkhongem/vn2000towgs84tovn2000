@@ -67,15 +67,15 @@ with col_left:
     st.markdown("## 📄 Upload hoặc nhập toạ độ")
     uploaded_file = st.file_uploader("Tải file TXT hoặc CSV", type=["txt", "csv"])
 
-if uploaded_file is not None:
-    content = uploaded_file.read().decode("utf-8")
-else:
-    content = ""
+    if uploaded_file is not None:
+        content = uploaded_file.read().decode("utf-8")
+    else:
+        content = ""
 
-coords_input = st.text_area("Nội dung toạ độ", value=content, height=180)
-
+    coords_input = st.text_area("Nội dung toạ độ", value=content, height=180)
 
     selected_display = st.selectbox("🧭️ Chọn kinh tuyến trục", options=lon0_display, index=default_index)
+
 
     st.markdown("### 🔄 Chuyển đổi toạ độ")
     tab1, tab2 = st.tabs(["VN2000 ➔ WGS84", "WGS84 ➔ VN2000"])
