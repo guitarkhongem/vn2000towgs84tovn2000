@@ -106,7 +106,7 @@ with col2:
         st.markdown("---")
         st.markdown("### 🗺️ Bản đồ")
 
-        tileset = "OpenStreetMap" if st.session_state.get("map_type", "Mặc định") == "Mặc định" else "Esri.WorldImagery"
+        tileset = "OpenStreetMap" if st.session_state.get("map_type", "Giao Thông") == "Giao Thông" else "Esri.WorldImagery"
 
         df_sorted = df.sort_values(by="Tên điểm", ascending=True)
         m = folium.Map(location=[df_sorted.iloc[0]["Vĩ độ (Lat)"], df_sorted.iloc[0]["Kinh độ (Lon)"]], zoom_start=15, tiles=tileset)
