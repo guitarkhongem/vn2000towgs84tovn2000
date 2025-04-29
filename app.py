@@ -152,7 +152,7 @@ with col2:
                     mime="application/vnd.google-earth.kml+xml"
                 )
         with col_maptype:
-            map_type = st.selectbox(options=["Giao Thông", "Vệ tinh"], index=0, key="map_type")
+            map_type = st.selectbox("🗺️ Chọn chế độ bản đồ:", options=["Giao Thông", "Vệ tinh"], index=0, key="map_type")
         with col_join:
             if "join_points" not in st.session_state:
                 st.session_state.join_points = False
