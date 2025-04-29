@@ -61,8 +61,23 @@ lon0_choices = {
 
 lon0_display = [f"{lon} – {province}" for lon, province in lon0_choices.items()]
 default_index = list(lon0_choices.keys()).index(106.25)
-col_left, col_right = st.columns([1, 2])
-  st.markdown("### 🔄 Chuyển đổi toạ độ")
+
+col_left, col_mid, col_map = st.columns([1, 1, 2])
+
+with col_left:
+    st.markdown("## 📄 Upload hoặc nhập toạ độ")
+    uploaded_file = st.file_uploader("Tải file TXT hoặc CSV", type=["txt", "csv"])
+
+    if uploaded_file is not None:
+        content = uploaded_file.read().decode("utf-8")
+    else:
+        content = ""
+
+    coords_input = st.text_area("Nội dung toạ độ", value=content, height=180)
+
+    selected_display = st.selectbox("🧭️ Chọn kinh tuyến trục", options=lon0_display, index=default_index)
+
+    st.markdown("### 🔄 Chuyển đổi toạ độ")
     tab1, tab2 = st.tabs(["VN2000 ➔ WGS84", "WGS84 ➔ VN2000"])
 
     with tab1:
@@ -70,7 +85,7 @@ col_left, col_right = st.columns([1, 2])
             parsed, errors = parse_coordinates(coords_input)
             if parsed:
                 df = pd.DataFrame(
-                    [(ten, *vn2000_to_wgs84_baibao(x, y, h, float(selected_display.split(" –")[0]))) for ten, x, y, h in parsed],
+                    [(ten, *vn2000_to_wgs84_baibao(x, y, h, float(selected_display.split("–")[0].strip()))) for ten, x, y, h in parsed],
                     columns=["Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]
                 )
                 st.session_state.df = df
@@ -105,39 +120,6 @@ col_left, col_right = st.columns([1, 2])
 
             if coords:
                 df = pd.DataFrame(
-                    [("", *wgs84_to_vn2000_baibao(lat, lon, h, float(selected_display.split(" –")[0]))) for lat, lon, h in coords],
-                    columns=["Tên điểm", "X (m)", "Y (m)", "h (m)"]
-                )
-                st.session_state.df = df
-                st.session_state.textout = "\n".join(
-                    f"{row['Tên điểm']} {row['X (m)']} {row['Y (m)']} {row['h (m)']}"
-                    for _, row in df.iterrows()
-                )
-                st.success(f"✅ Đã xử lý {len(df)} điểm.")
-            else:
-                st.error("⚠️ Không có dữ liệu hợp lệ!")
-        if st.button("⬅️ Chuyển sang VN2000"):
-            tokens = re.split(r"[\s\n]+", coords_input.strip())
-            coords = []
-            i = 0
-            while i < len(tokens):
-                chunk = []
-                for _ in range(3):
-                    if i < len(tokens):
-                        try:
-                            chunk.append(float(tokens[i].replace(",", ".")))
-                        except:
-                            break
-                        i += 1
-                if len(chunk) == 2:
-                    chunk.append(0.0)
-                if len(chunk) == 3:
-                    coords.append(chunk)
-                else:
-                    i += 1
-
-            if coords:
-                df = pd.DataFrame(
                     [("", *wgs84_to_vn2000_baibao(lat, lon, h, float(selected_display.split("–")[0].strip()))) for lat, lon, h in coords],
                     columns=["Tên điểm", "X (m)", "Y (m)", "h (m)"]
                 )
@@ -149,19 +131,6 @@ col_left, col_right = st.columns([1, 2])
                 st.success(f"✅ Đã xử lý {len(df)} điểm.")
             else:
                 st.error("⚠️ Không có dữ liệu hợp lệ!")
-col_left, col_mid, col_map = st.columns([1, 1, 2])
-
-with col_left:
-    st.markdown("## 📄 Upload hoặc nhập toạ độ")
-    uploaded_file = st.file_uploader("Tải file TXT hoặc CSV", type=["txt", "csv"], key="upload_common")
-
-    if uploaded_file is not None:
-        content = uploaded_file.read().decode("utf-8")
-        coords_input = st.text_area("Nội dung toạ độ", value=content, height=180, key="coords_input")
-    else:
-        coords_input = st.text_area("Nội dung toạ độ", height=180, key="coords_input")
-
-    selected_display = st.selectbox("🧭️ Chọn kinh tuyến trục", options=lon0_display, index=default_index)
 
 with col_mid:
     st.markdown("### 📊 Kết quả")
@@ -193,7 +162,7 @@ with col_map:
     if "df" in st.session_state:
         df_sorted = st.session_state.df.sort_values(by="Tên điểm", ascending=True)
 
-        map_type = st.selectbox("", options=["Giao Thông", "Vệ tinh"], index=0)
+        map_type = st.selectbox("Chế độ bản đồ", options=["Giao Thông", "Vệ tinh"], index=0)
         tileset = "OpenStreetMap" if map_type == "Giao Thông" else "Esri.WorldImagery"
 
         if "join_points" not in st.session_state:
@@ -202,21 +171,18 @@ with col_map:
         if st.button("🔵 Nối các điểm"):
             st.session_state.join_points = not st.session_state.join_points
 
-        m = folium.Map(location=[df_sorted.iloc[0]["Vĩ độ (Lat)"], df_sorted.iloc[0]["Kinh độ (Lon)"]],
-                       zoom_start=15, tiles=tileset)
+        m = folium.Map(location=[df_sorted.iloc[0]["Vĩ độ (Lat)"], df_sorted.iloc[0]["Kinh độ (Lon)"]], zoom_start=15, tiles=tileset)
 
         if st.session_state.join_points:
             points = [(row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]) for _, row in df_sorted.iterrows()]
             if points[0] != points[-1]:
                 points.append(points[0])
-
             folium.PolyLine(
                 locations=points,
                 weight=3,
                 color="blue",
                 tooltip="Polygon khép kín"
             ).add_to(m)
-
             for lat, lon in points[:-1]:
                 folium.CircleMarker(
                     location=[lat, lon],
@@ -236,7 +202,5 @@ with col_map:
                 ).add_to(m)
 
         st_folium(m, width="100%", height=400)
-
-
 
 show_footer()
