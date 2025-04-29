@@ -21,19 +21,15 @@ st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
 set_background("assets/background.png")
 st.markdown("""
 <style>
-iframe {
-    height: auto !important;
-    min-height: 400px !important;
-}
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<style>
 div.stButton > button, div.stDownloadButton > button {
 color: #B30000;
 font-weight: bold;
 }
+iframe {
+    height: 400px !important;
+    min-height: 400px !important;
+}
+.css-1aumxhk { width: 100% !important; } /* force selectbox to fill column */
 </style>
 """, unsafe_allow_html=True)
 
