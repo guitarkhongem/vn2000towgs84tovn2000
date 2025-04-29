@@ -144,52 +144,41 @@ with tab2:
 if "df" in st.session_state:
     df = st.session_state.df
 
-    if isinstance(df, pd.DataFrame) and {"Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
-        points = [(row["Kinh độ (Lon)"], row["Vĩ độ (Lat)"]) for _, row in df.iterrows()]
-        if len(points) >= 3:
-            if points[0] != points[-1]:
-                points.append(points[0])
-            polygon = Polygon(points)
-            st.markdown(f"### ➡️ Diện tích (WGS84, tính gần đúng): `{polygon.area:.6f}` độ vuông")
-        else:
-            line = LineString(points)
-            st.markdown(f"### ➡️ Chiều dài đường nối: `{line.length:.6f}` độ (trên hệ WGS84)")
+    if isinstance(df, pd.DataFrame) and {"Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
+        # --- Sắp xếp theo Tên điểm ---
+        df_sorted = df.sort_values(by="Tên điểm", ascending=True)
 
-    st.markdown("### Kết quả")
-    st.dataframe(df)
+        # --- Tạo list điểm ---
+        points = [(row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]) for _, row in df_sorted.iterrows()]
+        
+        # --- Khép kín polygon ---
+        if points[0] != points[-1]:
+            points.append(points[0])
 
-    st.markdown("### Kết quả Text")
-    st.text_area("Kết quả:", st.session_state.get("textout", ""), height=250)
+        import folium
+        from streamlit_folium import st_folium
 
-    st.download_button(
-        label="Tải xuống CSV",
-        data=df.to_csv(index=False).encode("utf-8"),
-        file_name="converted_points.csv",
-        mime="text/csv"
-    )
+        # Tạo Map centered vào điểm đầu tiên
+        m = folium.Map(location=[points[0][0], points[0][1]], zoom_start=15)
 
-    kml = df_to_kml(df)
-    if kml:
-        st.download_button(
-            label="Tải xuống KML",
-            data=kml,
-            file_name="converted_points.kml",
-            mime="application/vnd.google-earth.kml+xml"
-        )
+        # Vẽ polygon (khép kín)
+        folium.PolyLine(
+            locations=points,
+            weight=4,
+            color="blue",
+            tooltip="Polygon khép kín"
+        ).add_to(m)
 
-    if {"Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
-        st.markdown("### Bản đồ vệ tinh")
+        # Vẽ từng điểm marker
+        for idx, (lat, lon) in enumerate(points[:-1]):  # bỏ điểm cuối (vì là lặp lại)
+            folium.Marker(
+                location=[lat, lon],
+                popup=df_sorted.iloc[idx]["Tên điểm"],
+                icon=folium.Icon(color="red", icon="info-sign")
+            ).add_to(m)
 
-        st.markdown("""
-        <style>
-        iframe {
-            height: 550px !important;
-            min-height: 550px !important;
-        }
-        </style>
-        """, unsafe_allow_html=True)
+        st.markdown("### 📍 Đường nối khép kín các điểm")
+        st_folium(m, width="100%", height=600)
 
-        m = generate_map(df)
-        st_folium(m, width="100%", height=550)
 
 show_footer()
