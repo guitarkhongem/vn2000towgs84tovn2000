@@ -17,7 +17,6 @@ from functions.kml import df_to_kml
 from functions.footer import show_footer
 from functions.converter import vn2000_to_wgs84_baibao, wgs84_to_vn2000_baibao
 
-# Setup page
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
 set_background("assets/background.png")
 
@@ -58,87 +57,29 @@ lon0_choices = {
 lon0_display = [f"{lon} – {province}" for lon, province in lon0_choices.items()]
 default_index = list(lon0_choices.keys()).index(106.25)
 
-st.markdown("## 📄 Upload hoặc nhập dữ liệu toạ độ")
-uploaded_file = st.file_uploader("Tải file TXT hoặc CSV", type=["txt", "csv"], key="upload_common")
+col_left, col_right = st.columns([1, 2])
 
-if uploaded_file is not None:
-    content = uploaded_file.read().decode("utf-8")
-    coords_input = st.text_area("Nội dung toạ độ", value=content, height=180, key="coords_input")
-else:
-    coords_input = st.text_area("Nội dung toạ độ", height=180, key="coords_input")
+with col_left:
+    st.markdown("## 📄 Upload hoặc nhập toạ độ")
+    uploaded_file = st.file_uploader("Tải file TXT hoặc CSV", type=["txt", "csv"], key="upload_common")
 
-tab1, tab2 = st.tabs(["VN2000 ➔ WGS84", "WGS84 ➔ VN2000"])
+    if uploaded_file is not None:
+        content = uploaded_file.read().decode("utf-8")
+        coords_input = st.text_area("Nội dung toạ độ", value=content, height=180, key="coords_input")
+    else:
+        coords_input = st.text_area("Nội dung toạ độ", height=180, key="coords_input")
 
-with tab1:
-    st.subheader("VN2000 ➔ WGS84")
-    selected_display = st.selectbox("Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_vn2000")
-    selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
+    selected_display = st.selectbox("🗭️ Chọn kinh tuyến trục", options=lon0_display, index=default_index)
 
-    if st.button("Chuyển sang WGS84"):
-        parsed, errors = parse_coordinates(coords_input)
-
-        if parsed:
-            df = pd.DataFrame(
-                [(ten_diem, *vn2000_to_wgs84_baibao(x, y, h, selected_lon0)) for ten_diem, x, y, h in parsed],
-                columns=["Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]
-            )
-            st.session_state.df = df
-            st.session_state.textout = "\n".join(
-                f"{row['Tên điểm']} {row['Vĩ độ (Lat)']} {row['Kinh độ (Lon)']} {row['H (m)']}"
-                for _, row in df.iterrows()
-            )
-            st.success(f"✅ Đã xử lý {len(df)} điểm hợp lệ.")
-        else:
-            st.error("⚠️ Không có dữ liệu hợp lệ!")
-
-with tab2:
-    st.subheader("WGS84 ➔ VN2000")
-    selected_display = st.selectbox("Chọn kinh tuyến trục", options=lon0_display, index=default_index, key="lon0_wgs84")
-    selected_lon0 = list(lon0_choices.keys())[lon0_display.index(selected_display)]
-
-    if st.button("Chuyển sang VN2000"):
-        tokens = re.split(r'[\s\n]+', coords_input.strip())
-        coords = []
-        i = 0
-        while i < len(tokens):
-            chunk = []
-            for _ in range(3):
-                if i < len(tokens):
-                    try:
-                        chunk.append(float(tokens[i].replace(",", ".")))
-                    except:
-                        break
-                    i += 1
-            if len(chunk) == 2:
-                chunk.append(0.0)
-            if len(chunk) == 3:
-                coords.append(chunk)
-            else:
-                i += 1
-
-        if coords:
-            df = pd.DataFrame(
-                [("", *wgs84_to_vn2000_baibao(lat, lon, h, selected_lon0)) for lat, lon, h in coords],
-                columns=["Tên điểm", "X (m)", "Y (m)", "h (m)"]
-            )
-            st.session_state.df = df
-            st.session_state.textout = "\n".join(
-                f"{row['Tên điểm']} {row['X (m)']} {row['Y (m)']} {row['h (m)']}"
-                for _, row in df.iterrows()
-            )
-            st.success(f"Đã xử lý {len(df)} điểm.")
-
-if "df" in st.session_state:
-    df = st.session_state.df
-    col_left, col_right = st.columns([1, 2])
-
-    with col_left:
-        st.markdown("### 📅 Kết quả")
+with col_right:
+    st.markdown("### 📊 Kết quả")
+    if "df" in st.session_state:
+        df = st.session_state.df
         st.dataframe(df)
-        st.text_area("Kết quả:", st.session_state.get("textout", ""), height=250)
+        st.text_area("📄 Text kết quả", st.session_state.get("textout", ""), height=250)
 
         st.download_button(
-            label="Tải xuống CSV",
+            label="💾 Tải xuống CSV",
             data=df.to_csv(index=False).encode("utf-8"),
             file_name="converted_points.csv",
             mime="text/csv"
@@ -147,23 +88,24 @@ if "df" in st.session_state:
         kml = df_to_kml(df)
         if kml:
             st.download_button(
-                label="Tải xuống KML",
+                label="💾 Tải xuống KML",
                 data=kml,
                 file_name="converted_points.kml",
                 mime="application/vnd.google-earth.kml+xml"
             )
 
-    with col_right:
-        st.markdown("### 👇 Bản đồ")
+    st.markdown("---")
+    st.markdown("### 🗺️ Bản đồ")
+    if "df" in st.session_state:
         df_sorted = df.sort_values(by="Tên điểm", ascending=True)
-        
-        map_type = st.selectbox("🗺️ Chọn chế độ bản đồ:", options=["Mặc định", "Vệ tinh"], index=0)
+
+        map_type = st.selectbox("Chọn chế độ bản đồ:", options=["Mặc định", "Vệ tinh"], index=0)
         tileset = "OpenStreetMap" if map_type == "Mặc định" else "Esri.WorldImagery"
 
         if "join_points" not in st.session_state:
             st.session_state.join_points = False
 
-        if st.button("🔵 Nối các điểm thành đường khép kín"):
+        if st.button("🔵 Nối các điểm"):
             st.session_state.join_points = not st.session_state.join_points
 
         m = folium.Map(location=[df_sorted.iloc[0]["Vĩ độ (Lat)"], df_sorted.iloc[0]["Kinh độ (Lon)"]], zoom_start=15, tiles=tileset)
@@ -198,6 +140,6 @@ if "df" in st.session_state:
                     fill_color='red'
                 ).add_to(m)
 
-        st_folium(m, width="100%", height=700)
+        st_folium(m, width="100%", height=750)
 
 show_footer()
