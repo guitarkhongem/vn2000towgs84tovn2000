@@ -16,13 +16,11 @@ from functions.parse import parse_coordinates
 from functions.kml import df_to_kml
 from functions.footer import show_footer
 from functions.converter import vn2000_to_wgs84_baibao, wgs84_to_vn2000_baibao
-from functions.mapgen import generate_map
 
 # Setup page
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
 set_background("assets/background.png")
 
-# --- CSS chỉnh màu chữ nút thành đỏ đậm ---
 st.markdown("""
 <style>
 div.stButton > button, div.stDownloadButton > button {
@@ -32,15 +30,13 @@ font-weight: bold;
 </style>
 """, unsafe_allow_html=True)
 
-# Header
 col1, col2 = st.columns([1, 5])
 with col1:
     st.image("assets/logo.jpg", width=90)
 with col2:
     st.title("VN2000 ⇄ WGS84 Converter")
-    st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA")
+    st.markdown("### BẤT ĐỘNG SẢN HUYẾN HƯỚNG HÓA")
 
-# Danh sách kinh tuyến trục
 lon0_choices = {
     104.5: "Kiên Giang, Cà Mau",
     104.75: "Lào Cai, Phú Thọ, Nghệ An, An Giang",
@@ -62,9 +58,7 @@ lon0_choices = {
 lon0_display = [f"{lon} – {province}" for lon, province in lon0_choices.items()]
 default_index = list(lon0_choices.keys()).index(106.25)
 
-# Upload file chung
-st.markdown("## 📤 Upload hoặc nhập dữ liệu toạ độ")
-
+st.markdown("## 📄 Upload hoặc nhập dữ liệu toạ độ")
 uploaded_file = st.file_uploader("Tải file TXT hoặc CSV", type=["txt", "csv"], key="upload_common")
 
 if uploaded_file is not None:
@@ -73,7 +67,6 @@ if uploaded_file is not None:
 else:
     coords_input = st.text_area("Nội dung toạ độ", height=180, key="coords_input")
 
-# Tabs
 tab1, tab2 = st.tabs(["VN2000 ➔ WGS84", "WGS84 ➔ VN2000"])
 
 with tab1:
@@ -97,11 +90,6 @@ with tab1:
             st.success(f"✅ Đã xử lý {len(df)} điểm hợp lệ.")
         else:
             st.error("⚠️ Không có dữ liệu hợp lệ!")
-
-        if errors:
-            st.error(f"🚨 Có {len(errors)} dòng lỗi:")
-            df_errors = pd.DataFrame(errors, columns=["Tên điểm", "X", "Y", "H"])
-            st.dataframe(df_errors.style.set_properties(**{'background-color': 'pink'}))
 
 with tab2:
     st.subheader("WGS84 ➔ VN2000")
@@ -139,48 +127,38 @@ with tab2:
                 for _, row in df.iterrows()
             )
             st.success(f"Đã xử lý {len(df)} điểm.")
-        else:
-            st.error("Không có dữ liệu hợp lệ!")
 
-# Hiển thị kết quả
 if "df" in st.session_state:
     df = st.session_state.df
+    col_left, col_right = st.columns([1, 2])
 
-    st.markdown("### Kết quả")
-    st.dataframe(df)
+    with col_left:
+        st.markdown("### 📅 Kết quả")
+        st.dataframe(df)
+        st.text_area("Kết quả:", st.session_state.get("textout", ""), height=250)
 
-    st.markdown("### Kết quả Text")
-    st.text_area("Kết quả:", st.session_state.get("textout", ""), height=250)
-
-    st.download_button(
-        label="Tải xuống CSV",
-        data=df.to_csv(index=False).encode("utf-8"),
-        file_name="converted_points.csv",
-        mime="text/csv"
-    )
-
-    kml = df_to_kml(df)
-    if kml:
         st.download_button(
-            label="Tải xuống KML",
-            data=kml,
-            file_name="converted_points.kml",
-            mime="application/vnd.google-earth.kml+xml"
+            label="Tải xuống CSV",
+            data=df.to_csv(index=False).encode("utf-8"),
+            file_name="converted_points.csv",
+            mime="text/csv"
         )
 
-    if {"Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(df.columns):
+        kml = df_to_kml(df)
+        if kml:
+            st.download_button(
+                label="Tải xuống KML",
+                data=kml,
+                file_name="converted_points.kml",
+                mime="application/vnd.google-earth.kml+xml"
+            )
+
+    with col_right:
+        st.markdown("### 👇 Bản đồ")
         df_sorted = df.sort_values(by="Tên điểm", ascending=True)
-
-        map_type = st.selectbox(
-            "🗺️ Chọn chế độ bản đồ:",
-            options=["Mặc định", "Vệ tinh"],
-            index=0
-        )
-
-        if map_type == "Mặc định":
-            tileset = "OpenStreetMap"
-        else:
-            tileset = "Esri.WorldImagery"
+        
+        map_type = st.selectbox("🗺️ Chọn chế độ bản đồ:", options=["Mặc định", "Vệ tinh"], index=0)
+        tileset = "OpenStreetMap" if map_type == "Mặc định" else "Esri.WorldImagery"
 
         if "join_points" not in st.session_state:
             st.session_state.join_points = False
@@ -188,8 +166,7 @@ if "df" in st.session_state:
         if st.button("🔵 Nối các điểm thành đường khép kín"):
             st.session_state.join_points = not st.session_state.join_points
 
-        m = folium.Map(location=[df_sorted.iloc[0]["Vĩ độ (Lat)"], df_sorted.iloc[0]["Kinh độ (Lon)"]],
-                       zoom_start=15, tiles=tileset)
+        m = folium.Map(location=[df_sorted.iloc[0]["Vĩ độ (Lat)"], df_sorted.iloc[0]["Kinh độ (Lon)"]], zoom_start=15, tiles=tileset)
 
         if st.session_state.join_points:
             points = [(row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]) for _, row in df_sorted.iterrows()]
@@ -215,13 +192,12 @@ if "df" in st.session_state:
             for _, row in df_sorted.iterrows():
                 folium.CircleMarker(
                     location=[row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]],
-                    radius=3,
+                    radius=6,
                     color='red',
                     fill=True,
                     fill_color='red'
                 ).add_to(m)
 
-        st.markdown("### 🗺️ Bản đồ các điểm")
-        st_folium(m, width="100%", height=600)
+        st_folium(m, width="100%", height=700)
 
 show_footer()
