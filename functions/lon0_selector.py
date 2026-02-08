@@ -74,7 +74,7 @@ def select_lon0():
     st.markdown("### 🫐 Chọn múi chiếu VN-2000")
 
     # Cột tỉnh hẹp ~1/4, cột nhập lon0 vừa, phần còn lại làm trống
-    col_province, col_lon0, _ = st.columns([1, 1, 2])
+    col_province, col_lon0, _ = st.columns([1, 1, 3])
 
     with col_province:
         province = st.selectbox(
