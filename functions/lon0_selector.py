@@ -77,7 +77,7 @@ def select_lon0():
     spacer_l, content, spacer_r = st.columns([4, 2, 4])
 
     with content:
-        col1, col2 = st.columns(2)
+        col1, col2 = st.columns(1)
 
         with col1:
             province = st.selectbox(
@@ -88,7 +88,7 @@ def select_lon0():
 
         with col2:
             manual_lon0 = st.number_input(
-                "Hoặc nhập kinh tuyến trục (decimal)",
+                "Hoặc nhập kinh tuyến trục",
                 min_value=102.0,
                 max_value=110.0,
                 value=106.25,
