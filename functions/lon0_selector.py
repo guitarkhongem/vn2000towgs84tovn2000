@@ -79,7 +79,7 @@ def select_lon0():
     if "province_select" not in st.session_state:
         st.session_state.province_select = "-- Không chọn --"
 
-    col_province, col_lon0 = st.columns(2)
+    col_province, col_lon0, _ = st.columns([1, 1, 2])
 
     # --- Chọn tỉnh ---
     with col_province:
