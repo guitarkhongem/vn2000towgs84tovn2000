@@ -46,8 +46,12 @@ with col1:
 with col2:
     st.title("VN2000 ⇄ WGS84 Converter")
     st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA")
-# --- Longitude zone selector ---    
+
+# --- Longitude zone selector ---
 lon0 = select_lon0()
+
+# --- Main layout columns ---
+col_left, col_mid, col_map = st.columns([1, 1, 2])
 
 # --- Input column ---
 with col_left:
@@ -70,9 +74,7 @@ with col_left:
         | 5   | `1838446.03 550074.77 37.98`              | X Y H                                |
 
         ✅ **Phân cách** có thể là: khoảng trắng, tab, hoặc xuống dòng.  
-                """, unsafe_allow_html=True)
-
-    selected_display = st.selectbox("🫐 Kinh tuyến trục", options=lon0_display, index=default_index)
+    """, unsafe_allow_html=True)
 
     st.markdown("### 🔄 Chuyển đổi toạ độ")
     tab1, tab2 = st.tabs(["VN2000 ➔ WGS84", "WGS84 ➔ VN2000"])
@@ -82,8 +84,7 @@ with tab1:
         parsed, errors = parse_coordinates(coords_input)
         if parsed:
             df = pd.DataFrame(
-                [(ten, *vn2000_to_wgs84_baibao(x, y, h, float(selected_display.split("–")[0].strip())
-)) for ten, x, y, h in parsed],
+                [(ten, *vn2000_to_wgs84_baibao(x, y, h, lon0)) for ten, x, y, h in parsed],
                 columns=["STT", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]
             )
             df["Tên điểm"] = df["STT"]
@@ -119,7 +120,8 @@ with tab2:
 
         if coords:
             df = pd.DataFrame(
-                [(str(i+1), *wgs84_to_vn2000_baibao(lat, lon, h, float(selected_display.split("–")[0].strip()))) for i, (lat, lon, h) in enumerate(coords)],
+                [(str(i+1), *wgs84_to_vn2000_baibao(lat, lon, h, lon0))
+                 for i, (lat, lon, h) in enumerate(coords)],
                 columns=["Tên điểm", "X (m)", "Y (m)", "h (m)"]
             )
             st.session_state.df = df
@@ -157,7 +159,6 @@ with col_mid:
                     mime="application/vnd.google-earth.kml+xml"
                 )
 
-        # 👉 THÊM NGAY DƯỚI ĐÂY (nằm trong col_mid)
         if st.session_state.get("join_points", False) and st.session_state.get("show_lengths", False):
             df_sorted = df.sort_values(
                 by="Tên điểm",
@@ -176,14 +177,15 @@ with col_mid:
                     mime="text/csv"
                 )
 
-
-
-
 # --- Map rendering ---
 with col_map:
     st.markdown("### 🗺️ Bản đồ")
     if "df" in st.session_state and {"Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(st.session_state.df.columns):
-        df_sorted = st.session_state.df.sort_values(by="Tên điểm", key=lambda col: col.map(lambda x: int(x) if str(x).isdigit() else str(x)), ascending=True).reset_index(drop=True)
+        df_sorted = st.session_state.df.sort_values(
+            by="Tên điểm",
+            key=lambda col: col.map(lambda x: int(x) if str(x).isdigit() else str(x)),
+            ascending=True
+        ).reset_index(drop=True)
 
         map_type = st.selectbox("Chế độ bản đồ", options=["Giao Thông", "Vệ tinh"], index=0)
         tileset = "OpenStreetMap" if map_type == "Giao Thông" else "Esri.WorldImagery"
@@ -194,50 +196,42 @@ with col_map:
                 st.session_state.join_points = not st.session_state.get("join_points", False)
 
         with col_btn2:
-            if "df" in st.session_state and {"Vĩ độ (Lat)", "Kinh độ (Lon)"} <= set(st.session_state.df.columns):
-                if st.button("📐 Tính diện tích VN2000 / WGS84"):
-                    parsed, errors = parse_coordinates(coords_input)
+            if st.button("📐 Tính diện tích VN2000 / WGS84"):
+                parsed, errors = parse_coordinates(coords_input)
+                if parsed:
+                    xy_points = [(x, y) for _, x, y, _ in parsed]
+                    latlon_points = [(row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"])
+                                     for _, row in st.session_state.df.iterrows()]
+                    A1, A2, diff, ha1, ha2 = compare_areas(xy_points, latlon_points)
+                    st.markdown(f"""
+                    ### 📐 So sánh diện tích
+                    🧮 Shoelace (VN2000): `{A1:,.1f} m²` (~{ha1:.1f} ha)  
+                    🌍 Geodesic (WGS84): `{A2:,.1f} m²` (~{ha2:.1f} ha)
+                    """)
+                else:
+                    st.warning("⚠️ Dữ liệu đầu vào không hợp lệ hoặc chưa có.")
 
-                    if not parsed:
-                        st.warning("⚠️ Dữ liệu đầu vào không hợp lệ hoặc chưa có.")
-                    else:
-                        xy_points = [(x, y) for _, x, y, _ in parsed]
-                        latlon_points = [(row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]) for _, row in st.session_state.df.iterrows()]
-                        A1, A2, diff, ha1, ha2 = compare_areas(xy_points, latlon_points)
-                        st.markdown(f"""
-                        ### 📐 So sánh diện tích
-                        🧮 Shoelace (VN2000): `{A1:,.1f} m²` (~{ha1:.1f} ha)  
-                        🌍 Geodesic (WGS84): `{A2:,.1f} m²` (~{ha2:.1f} ha)  
-                        """)
-                       
         with col_btn3:
             if st.button("📏 Hiện kích thước cạnh"):
                 st.session_state.show_lengths = not st.session_state.get("show_lengths", False)
 
         m = folium.Map(
-        location=[df_sorted.iloc[0]["Vĩ độ (Lat)"], df_sorted.iloc[0]["Kinh độ (Lon)"]],
-        zoom_start=15,
-        tiles=tileset
+            location=[df_sorted.iloc[0]["Vĩ độ (Lat)"], df_sorted.iloc[0]["Kinh độ (Lon)"]],
+            zoom_start=15,
+            tiles=tileset
         )
 
-        # === Marker dẫn đường ngay trên bản đồ ===
         first_point = df_sorted.iloc[0]
         lat = first_point["Vĩ độ (Lat)"]
         lon = first_point["Kinh độ (Lon)"]
-        popup_html = f"""
-        <b>{first_point['Tên điểm']}</b><br>
-        <a href='https://www.google.com/maps/dir/?api=1&destination={lat},{lon}' target='_blank'>
-        📍 Dẫn đường Google Maps</a>
-        """
 
         folium.Marker(
             location=[lat, lon],
-            popup=popup_html,
+            popup=f"<b>{first_point['Tên điểm']}</b>",
             tooltip="📍 Vị trí điểm đầu",
             icon=folium.Icon(color='red', icon='map-marker', prefix='fa')
         ).add_to(m)
 
-        # === Vẽ các điểm còn lại ===
         if st.session_state.get("join_points", False):
             points = [(row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]) for _, row in df_sorted.iterrows()]
             draw_polygon(m, points)
@@ -248,17 +242,6 @@ with col_map:
             add_numbered_markers(m, df_sorted)
 
         st_folium(m, width="100%", height=400)
-
-        # === Nút dẫn đường riêng bên dưới bản đồ ===
-        maps_url = f"https://www.google.com/maps/dir/?api=1&destination={lat},{lon}"
-        st.markdown(
-            f"<a href='{maps_url}' target='_blank'>"
-            f"<button style='padding:8px 16px; font-size:16px; background-color:#2d8cff; color:white; border:none; border-radius:5px;'>🧭 Dẫn đường Google Maps (điểm đầu)</button>"
-            f"</a>",
-            unsafe_allow_html=True
-        )
-   
-
 
 # --- Footer ---
 show_footer()
