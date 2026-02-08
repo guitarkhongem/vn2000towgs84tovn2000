@@ -15,6 +15,10 @@ def parse_coordinates(text):
         tokens = re.split(r'[\t\s,]+', line)
         tokens = [t.replace(",", ".") for t in tokens]
         tokens = [t for t in tokens if t]
+        # bỏ ký tự dẫn ở STT (>, #, ...)
+        tokens[0] = re.sub(r'^[^0-9A-Za-z]+', '', tokens[0])
+        # nếu dư token ở cuối (ghi chú) → bỏ
+        tokens = tokens[:4]
 
         # --- Gom 3 dòng đơn ---
         if len(tokens) == 1 and i + 2 < len(lines):
