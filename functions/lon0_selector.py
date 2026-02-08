@@ -93,9 +93,9 @@ def select_lon0():
 
     if province != "-- Không chọn --":
         lon0 = LON0_BY_PROVINCE[province]
-        st.success(f"Kinh tuyến trục theo tỉnh **{province}**: **{lon0} (decimal)**")
+        st.success(f"Kinh tuyến trục theo tỉnh **{province}**: **{lon0} **")
     else:
         lon0 = manual_lon0
-        st.info(f"Dùng kinh tuyến trục nhập tay: **{lon0} (decimal)**")
+        st.info(f"Dùng kinh tuyến trục nhập tay: **{lon0} **")
 
     return lon0
