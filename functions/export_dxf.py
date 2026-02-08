@@ -3,27 +3,34 @@ import ezdxf
 
 def export_to_dxf(points, filepath):
     """
-    points: list of (name, x, y)  # x = Easting, y = Northing (VN2000)
-    filepath: output dxf path
+    points: list of (name, x, y)
+        x = Northing (BẮC)
+        y = Easting  (ĐÔNG)
+    DXF:
+        X = Easting
+        Y = Northing
     """
 
     doc = ezdxf.new(dxfversion="R2010")
     msp = doc.modelspace()
 
-    # --- Layers ---
+    # Layers
     if "POINTS" not in doc.layers:
         doc.layers.new(name="POINTS", dxfattribs={"color": 1})
     if "TEXT" not in doc.layers:
         doc.layers.new(name="TEXT", dxfattribs={"color": 3})
 
     for name, x, y in points:
-        # --- Vẽ điểm (ĐÚNG TRỤC) ---
+        Xcad = y   # ĐẢO Ở ĐÂY
+        Ycad = x
+
+        # Vẽ điểm
         msp.add_point(
-            (x, y),
+            (Xcad, Ycad),
             dxfattribs={"layer": "POINTS"}
         )
 
-        # --- Ghi tên điểm (lệch nhẹ để dễ nhìn) ---
+        # Ghi tên điểm
         txt = msp.add_text(
             str(name),
             dxfattribs={
@@ -31,6 +38,6 @@ def export_to_dxf(points, filepath):
                 "layer": "TEXT"
             }
         )
-        txt.dxf.insert = (x + 1.0, y + 1.0)
+        txt.dxf.insert = (Xcad + 1.0, Ycad + 1.0)
 
     doc.saveas(filepath)
