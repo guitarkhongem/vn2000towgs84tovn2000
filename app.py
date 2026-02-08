@@ -144,7 +144,7 @@ with col_mid:
 # =========================
 # Map
 # =========================
-with col_map:
+    with col_map:
     if "df" in st.session_state and {"Vĩ độ (Lat)", "Kinh độ (Lon)"} <= set(st.session_state.df.columns):
         dfm = st.session_state.df.sort_values(
             "Tên điểm", key=lambda c: c.map(sort_point_name)
