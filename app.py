@@ -144,7 +144,7 @@ with col_mid:
 # =========================
 # Map
 # =========================
-    with col_map:
+with col_map:
     if "df" in st.session_state and {"Vĩ độ (Lat)", "Kinh độ (Lon)"} <= set(st.session_state.df.columns):
         dfm = st.session_state.df.sort_values(
             "Tên điểm", key=lambda c: c.map(sort_point_name)
@@ -190,7 +190,7 @@ with col_mid:
             location=[dfm.iloc[0]["Vĩ độ (Lat)"], dfm.iloc[0]["Kinh độ (Lon)"]],
             zoom_start=15
         )
-
+        dfm = dfm.sort_values("Tên điểm", key=lambda c: c.map(sort_point_name))
         pts = [(r["Vĩ độ (Lat)"], r["Kinh độ (Lon)"]) for _, r in dfm.iterrows()]
         if st.session_state.get("join_points", False):
             draw_polygon(m, pts)
