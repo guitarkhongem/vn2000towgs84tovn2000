@@ -73,8 +73,8 @@ LON0_BY_PROVINCE = {
 def select_lon0():
     st.markdown("### 🫐 Chọn múi chiếu VN-2000")
 
-    # Hai ô mỗi cái chiếm ~1/2 chiều ngang
-    col_province, col_lon0 = st.columns(2)
+    # Cột tỉnh hẹp ~1/4, cột nhập lon0 vừa, phần còn lại làm trống
+    col_province, col_lon0, _ = st.columns([1, 1, 2])
 
     with col_province:
         province = st.selectbox(
@@ -100,6 +100,5 @@ def select_lon0():
         st.info(f"Dùng kinh tuyến trục nhập tay: {lon0} (decimal)")
 
     return lon0
-
 
 
