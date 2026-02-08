@@ -73,7 +73,11 @@ LON0_BY_PROVINCE = {
 def select_lon0():
     st.markdown("### 🫐 Chọn múi chiếu VN-2000")
 
-    col1, col2 = st.columns(2)
+# 3 cột: trống | nội dung | trống  → nội dung ở giữa, hẹp
+spacer_l, content, spacer_r = st.columns([3, 2, 3])
+
+with content:
+    col1, col2 = st.columns([1, 1])
 
     with col1:
         province = st.selectbox(
