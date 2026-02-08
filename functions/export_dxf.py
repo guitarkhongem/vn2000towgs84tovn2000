@@ -1,32 +1,31 @@
 import ezdxf
 
-def export_to_dxf(points, filename):
+
+def export_to_dxf(points, filepath):
     """
-    points = [
-        ("pt1", X, Y),
-        ("pt2", X, Y),
-        ...
-    ]
+    points: list of (name, x, y)
+    filepath: output dxf path
     """
-    doc = ezdxf.new("R2010")
+
+    doc = ezdxf.new(dxfversion="R2010")
     msp = doc.modelspace()
 
-    # Layer
+    # --- Layers ---
     doc.layers.new(name="POINTS", dxfattribs={"color": 1})
-    doc.layers.new(name="TEXT", dxfattribs={"color": 2})
-    doc.layers.new(name="POLY", dxfattribs={"color": 3})
+    doc.layers.new(name="TEXT", dxfattribs={"color": 3})
 
-    # Vẽ point + text
     for name, x, y in points:
-        msp.add_point((y, x), dxfattribs={"layer": "POINTS"})
-        msp.add_text(
-            name,
-            dxfattribs={"height": 1.5, "layer": "TEXT"}
-        ).set_pos((y + 1, x + 1))
+        # Điểm
+        msp.add_point((x, y), dxfattribs={"layer": "POINTS"})
 
-    # Vẽ polyline nếu >2 điểm
-    if len(points) >= 2:
-        poly_points = [(y, x) for _, x, y in points]
-        msp.add_lwpolyline(poly_points, close=True, dxfattribs={"layer": "POLY"})
+        # Text tên điểm
+        txt = msp.add_text(
+            str(name),
+            dxfattribs={
+                "height": 1.2,
+                "layer": "TEXT"
+            }
+        )
+        txt.dxf.insert = (x + 1, y + 1)
 
-    doc.saveas(filename)
+    doc.saveas(filepath)
