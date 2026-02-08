@@ -191,12 +191,17 @@ with col_map:
         with col_btn3:
             if st.button("📏 Hiện cạnh"):
                 st.session_state.show_lengths = not st.session_state.get("show_lengths", False)
-
+        map_type = st.selectbox(
+    "Chế độ bản đồ",
+    ["Giao Thông", "Vệ tinh"]
+)
+        tileset = "OpenStreetMap" if map_type == "Giao Thông" else "Esri.WorldImagery"
         # --- Vẽ bản đồ ---
         m = folium.Map(
-            location=[dfm.iloc[0]["Vĩ độ (Lat)"], dfm.iloc[0]["Kinh độ (Lon)"]],
-            zoom_start=15
-        )
+    location=[dfm.iloc[0]["Vĩ độ (Lat)"], dfm.iloc[0]["Kinh độ (Lon)"]],
+    zoom_start=15,
+    tiles=tileset
+)
 
         pts = [(r["Vĩ độ (Lat)"], r["Kinh độ (Lon)"]) for _, r in dfm.iterrows()]
 
