@@ -104,10 +104,12 @@ with tab2:
         tokens = re.split(r"[,\s\n]+", coords_input.strip())
         pts = []
         i = 0
+
         while i + 1 < len(tokens):
             try:
-                lat, lon = float(tokens[i]), float(tokens[i+1])
-                h = float(tokens[i+2]) if i+2 < len(tokens) else 0
+                lat = float(tokens[i])
+                lon = float(tokens[i + 1])
+                h = float(tokens[i + 2]) if i + 2 < len(tokens) else 0.0
                 pts.append((lat, lon, h))
                 i += 3
             except:
@@ -115,16 +117,24 @@ with tab2:
 
         if pts:
             df = pd.DataFrame(
-    [(str(i+1), *wgs84_to_vn2000_baibao(lat, lon, h, lon0))
-     for i, (lat, lon, h) in enumerate(pts)],
-    columns=["Tên điểm", "X (m)", "Y (m)", "H (m)"]
-)
-st.session_state.df = df
+                [
+                    (str(i + 1), *wgs84_to_vn2000_baibao(lat, lon, h, lon0))
+                    for i, (lat, lon, h) in enumerate(pts)
+                ],
+                columns=["Tên điểm", "X (m)", "Y (m)", "H (m)"]
+            )
 
-st.session_state.textout = "\n".join(
-    f"{r['Tên điểm']} {r['X (m)']} {r['Y (m)']} {r['H (m)']}"
-    for _, r in df.iterrows()
-)
+            # ✅ GÁN SESSION STATE ĐÚNG CHỖ
+            st.session_state.df = df
+
+            st.session_state.textout = "\n".join(
+                f"{r['Tên điểm']} {r['X (m)']} {r['Y (m)']} {r['H (m)']}"
+                for _, r in df.iterrows()
+            )
+
+        else:
+            st.error("⚠️ Không có dữ liệu hợp lệ để chuyển sang VN2000")
+
 
 # =========================
 # Output + CAD
