@@ -78,19 +78,23 @@ with col_left:
 with tab1:
     if st.button("➡️ Chuyển sang WGS84"):
         parsed, _ = parse_coordinates(coords_input)
+
         if parsed:
             df = pd.DataFrame(
-    [(t, *vn2000_to_wgs84_baibao(x, y, h, lon0)) for t, x, y, h in parsed],
-    columns=["Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]
-)
-st.session_state.df = df
+                [(t, *vn2000_to_wgs84_baibao(x, y, h, lon0)) for t, x, y, h in parsed],
+                columns=["Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]
+            )
 
-st.session_state.textout = "\n".join(
-    f"{r['Tên điểm']} {r['Vĩ độ (Lat)']} {r['Kinh độ (Lon)']} {r['H (m)']}"
-    for _, r in df.iterrows()
-)
+            st.session_state.df = df
+
+            st.session_state.textout = "\n".join(
+                f"{r['Tên điểm']} {r['Vĩ độ (Lat)']} {r['Kinh độ (Lon)']} {r['H (m)']}"
+                for _, r in df.iterrows()
+            )
+
         else:
             st.error("Không có dữ liệu hợp lệ")
+
 
 # =========================
 # WGS84 ➜ VN2000
