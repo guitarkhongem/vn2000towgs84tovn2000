@@ -171,21 +171,43 @@ with col_mid:
                     "application/vnd.google-earth.kml+xml",
                 )
 
-        # ===== Xuất CAD – CHỈ KHI CÓ X/Y =====
-        if {"X (m)", "Y (m)"} <= set(df.columns):
-            st.markdown("### 🧱 Xuất bản vẽ CAD")
-            if st.button("📐 Xuất file CAD (DXF)"):
-                tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".dxf")
-                pts = [(r["Tên điểm"], r["X (m)"], r["Y (m)"]) for _, r in df.iterrows()]
-                export_to_dxf(pts, tmp.name)
+        st.markdown("### 🧱 Xuất bản vẽ CAD (DXF)")
 
-                with open(tmp.name, "rb") as f:
-                    st.download_button(
-                        "⬇️ Tải DXF",
-                        f,
-                        file_name="toado_vn2000.dxf",
-                        mime="application/dxf",
-                    )
+if st.button("📐 Xuất file CAD (DXF)"):
+
+    pts = []
+
+    # --- Trường hợp 1: Kết quả đang là VN2000 ---
+    if {"X (m)", "Y (m)"} <= set(df.columns):
+        pts = [
+            (row["Tên điểm"], row["X (m)"], row["Y (m)"])
+            for _, row in df.iterrows()
+        ]
+
+    # --- Trường hợp 2: Kết quả là WGS84 → lấy lại VN2000 từ input ---
+    else:
+        parsed, errors = parse_coordinates(coords_input)
+        if parsed:
+            pts = [
+                (ten, x, y)
+                for ten, x, y, h in parsed
+            ]
+
+    # --- Xuất DXF nếu có điểm hợp lệ ---
+    if pts:
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".dxf")
+        export_to_dxf(pts, tmp.name)
+
+        with open(tmp.name, "rb") as f:
+            st.download_button(
+                "⬇️ Tải file DXF",
+                f,
+                file_name="toado_vn2000.dxf",
+                mime="application/dxf"
+            )
+    else:
+        st.error("❌ Không tìm thấy toạ độ VN2000 hợp lệ để xuất CAD.")
+
 
 # =========================
 # Map rendering (GIỮ NGUYÊN)
