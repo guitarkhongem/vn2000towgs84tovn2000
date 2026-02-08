@@ -82,7 +82,7 @@ def select_lon0():
         with col1:
             province = st.selectbox(
                 "Chọn tỉnh / thành phố",
-                ["-- Không chọn --"] + sorted(LON0_BY_PROVINCE.keys()),
+                ["Không chọn"] + sorted(LON0_BY_PROVINCE.keys()),
                 index=0
             )
 
