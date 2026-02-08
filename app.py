@@ -20,6 +20,8 @@ from functions.edges import add_edge_lengths
 from functions.markers import add_numbered_markers
 from functions.polygon import draw_polygon
 from functions.area import compare_areas
+from functions.lon0_selector import select_lon0
+
 # --- Page setup ---
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
 set_background("assets/background.png")
@@ -44,90 +46,8 @@ with col1:
 with col2:
     st.title("VN2000 ⇄ WGS84 Converter")
     st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA")
-
-# --- Longitude zone selector ---
-lon0_choices = {
-    "Lai Châu": 103.0,
-    "Sơn La": 104.0,
-
-    "Kiên Giang": 104.5,
-    "Cà Mau": 104.5,
-
-    "Lào Cai": 104.75,
-    "Yên Bái": 104.75,
-    "Nghệ An": 104.75,
-    "Phú Thọ": 104.75,
-    "An Giang": 104.75,
-
-    "Thanh Hóa": 105.0,
-    "Vĩnh Phúc": 105.0,
-    "Hà Tây": 105.0,
-    "Đồng Tháp": 105.0,
-    "Cần Thơ": 105.0,
-    "Bạc Liêu": 105.0,
-    "Hà Nội": 105.0,
-    "Ninh Bình": 105.0,
-    "Hà Nam": 105.0,
-
-    "Hà Giang": 105.5,
-    "Hải Dương": 105.5,
-    "Hà Tĩnh": 105.5,
-    "Bắc Ninh": 105.5,
-    "Hưng Yên": 105.5,
-    "Thái Bình": 105.5,
-    "Nam Định": 105.5,
-    "Tây Ninh": 105.5,
-    "Vĩnh Long": 105.5,
-    "Sóc Trăng": 105.5,
-    "Trà Vinh": 105.5,
-
-    "Cao Bằng": 105.75,
-    "Long An": 105.75,
-    "Tiền Giang": 105.75,
-    "Bến Tre": 105.75,
-    "Hải Phòng": 105.75,
-    "TP. Hồ Chí Minh": 105.75,
-    "Bình Dương": 105.75,
-
-    "Tuyên Quang": 106.0,
-    "Hòa Bình": 106.0,
-    "Quảng Bình": 106.0,
-
-    "Quảng Trị": 106.25,
-    "Bình Phước": 106.25,
-
-    "Bắc Kạn": 106.5,
-    "Thái Nguyên": 106.5,
-
-    "Bắc Giang": 107.0,
-    "Thừa Thiên Huế": 107.0,
-
-    "Lạng Sơn": 107.25,
-
-    "Kon Tum": 107.5,
-
-    "Quảng Ninh": 107.75,
-    "Đồng Nai": 107.75,
-    "Bà Rịa – Vũng Tàu": 107.75,
-    "Quảng Nam": 107.75,
-    "Lâm Đồng": 107.75,
-    "Đà Nẵng": 107.75,
-
-    "Quảng Ngãi": 108.0,
-
-    "Ninh Thuận": 108.25,
-    "Khánh Hòa": 108.25,
-    "Bình Định": 108.25,
-
-    "Đắk Lắk": 108.5,
-    "Phú Yên": 108.5,
-    "Gia Lai": 108.5,
-    "Bình Thuận": 108.5
-}
-lon0_display = [f"{lon} – {province}" for lon, province in lon0_choices.items()]
-default_index = list(lon0_choices.keys()).index(106.25)
-
-col_left, col_mid, col_map = st.columns([1, 1, 2])
+# --- Longitude zone selector ---    
+lon0 = select_lon0()
 
 # --- Input column ---
 with col_left:
