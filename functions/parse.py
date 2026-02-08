@@ -12,7 +12,7 @@ def parse_coordinates(text):
 
     while i < len(lines):
         line = lines[i].strip().replace(",", ".")
-        tokens = re.split(r'[\t\s]+', line)
+        tokens = re.split(r'[\t\s,]+', line)
         tokens = [t for t in tokens if t]
 
         # --- Gom 3 dòng đơn ---
