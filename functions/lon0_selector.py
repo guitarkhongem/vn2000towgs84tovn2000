@@ -73,7 +73,7 @@ LON0_BY_PROVINCE = {
 def select_lon0():
     st.markdown("### 🫐 Chọn múi chiếu VN-2000")
 
-    # Cột tỉnh hẹp ~1/4, cột nhập lon0 vừa, phần còn lại làm trống
+    # Hai ô mỗi cái chiếm ~1/2 chiều ngang
     col_province, col_lon0 = st.columns(2)
 
     with col_province:
@@ -100,5 +100,6 @@ def select_lon0():
         st.info(f"Dùng kinh tuyến trục nhập tay: {lon0} (decimal)")
 
     return lon0
+
 
 
