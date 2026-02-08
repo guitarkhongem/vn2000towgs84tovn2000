@@ -73,32 +73,50 @@ LON0_BY_PROVINCE = {
 def select_lon0():
     st.markdown("### 🫐 Chọn múi chiếu VN-2000")
 
-    # Cột tỉnh hẹp ~1/4, cột nhập lon0 vừa, phần còn lại làm trống
-    col_province, col_lon0, _ = st.columns([1, 1, 3])
+    # Khởi tạo session_state nếu chưa có
+    if "lon0_value" not in st.session_state:
+        st.session_state.lon0_value = 106.25
+
+    col_province, col_lon0 = st.columns(2)
 
     with col_province:
         province = st.selectbox(
             "Chọn tỉnh / thành phố",
             ["-- Không chọn --"] + sorted(LON0_BY_PROVINCE.keys()),
-            index=0
+            index=0,
+            key="province_select"
         )
 
+    # 👉 Nếu chọn tỉnh → cập nhật lon0 theo tỉnh
+    if province != "-- Không chọn --":
+        st.session_state.lon0_value = LON0_BY_PROVINCE[province]
+
     with col_lon0:
-        manual_lon0 = st.number_input(
+        lon0 = st.number_input(
             "Hoặc nhập kinh tuyến trục (decimal)",
             min_value=102.0,
             max_value=110.0,
-            value=106.25,
-            step=0.25
+            value=st.session_state.lon0_value,
+            step=0.25,
+            key="lon0_input"
         )
 
-    if province != "-- Không chọn --":
-        lon0 = LON0_BY_PROVINCE[province]
-        st.success(f"Kinh tuyến trục: {lon0} (decimal)")
-    else:
-        lon0 = manual_lon0
-        st.info(f"Dùng kinh tuyến trục nhập tay: {lon0} (decimal)")
+    # 👉 Nếu người dùng nhập tay → ghi đè lại session_state
+    st.session_state.lon0_value = lon0
 
-    return lon0
+    # Hiển thị trạng thái
+    if province != "-- Không chọn --":
+        st.success(
+            f"Kinh tuyến trục theo tỉnh **{province}**: "
+            f"**{st.session_state.lon0_value} (decimal)**"
+        )
+    else:
+        st.info(
+            f"Dùng kinh tuyến trục nhập tay: "
+            f"**{st.session_state.lon0_value} (decimal)**"
+        )
+
+    return st.session_state.lon0_value
+
 
 
