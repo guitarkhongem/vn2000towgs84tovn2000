@@ -14,6 +14,7 @@ def parse_coordinates(text):
         line = lines[i].strip()
         tokens = re.split(r'[\t\s,]+', line)
         tokens = [t.replace(",", ".") for t in tokens]
+        tokens = [t for t in tokens if t]
 
         # --- Gom 3 dòng đơn ---
         if len(tokens) == 1 and i + 2 < len(lines):
