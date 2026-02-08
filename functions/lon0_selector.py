@@ -74,7 +74,7 @@ def select_lon0():
     st.markdown("### 🫐 Chọn múi chiếu VN-2000")
 
 # 3 cột: trống | nội dung | trống  → nội dung ở giữa, hẹp
-spacer_l, content, spacer_r = st.columns([3, 2, 3])
+spacer_l, content, spacer_r = st.columns([5, 2, 5])
 
 with content:
     col1, col2 = st.columns([1, 1])
