@@ -144,6 +144,9 @@ with col_mid:
 # =========================
 # Map
 # =========================
+# =========================
+# Map
+# =========================
 with col_map:
     if "df" in st.session_state and {"Vĩ độ (Lat)", "Kinh độ (Lon)"} <= set(st.session_state.df.columns):
         dfm = st.session_state.df.sort_values(
@@ -152,46 +155,51 @@ with col_map:
 
         col_btn1, col_btn2, col_btn3 = st.columns(3)
 
+        # --- Nối điểm ---
         with col_btn1:
             if st.button("🔵 Nối điểm"):
                 st.session_state.join_points = not st.session_state.get("join_points", False)
 
+        # --- Tính diện tích ---
         with col_btn2:
-    if st.button("📐 Tính diện tích"):
-        # Lấy XY VN2000 một cách chắc chắn
-        if {"X (m)", "Y (m)"} <= set(st.session_state.df.columns):
-            xy_points = [
-                (r["X (m)"], r["Y (m)"])
-                for _, r in st.session_state.df.iterrows()
-            ]
-        else:
-            parsed, _ = parse_coordinates(coords_input)
-            xy_points = [(x, y) for _, x, y, _ in parsed]
+            if st.button("📐 Tính diện tích"):
+                # Lấy XY VN2000 chắc chắn
+                if {"X (m)", "Y (m)"} <= set(st.session_state.df.columns):
+                    xy_points = [
+                        (r["X (m)"], r["Y (m)"])
+                        for _, r in st.session_state.df.iterrows()
+                    ]
+                else:
+                    parsed, _ = parse_coordinates(coords_input)
+                    xy_points = [(x, y) for _, x, y, _ in parsed]
 
-        latlon_points = [
-            (r["Vĩ độ (Lat)"], r["Kinh độ (Lon)"])
-            for _, r in dfm.iterrows()
-        ]
+                latlon_points = [
+                    (r["Vĩ độ (Lat)"], r["Kinh độ (Lon)"])
+                    for _, r in dfm.iterrows()
+                ]
 
-        if len(xy_points) >= 3:
-            A1, A2, _, ha1, ha2 = compare_areas(xy_points, latlon_points)
-            st.info(
-                f"📐 Diện tích VN2000: {ha1:.2f} ha | "
-                f"WGS84: {ha2:.2f} ha"
-            )
-        else:
-            st.warning("⚠️ Cần tối thiểu 3 điểm để tính diện tích")
+                if len(xy_points) >= 3:
+                    A1, A2, _, ha1, ha2 = compare_areas(xy_points, latlon_points)
+                    st.info(
+                        f"📐 Diện tích VN2000: {ha1:.2f} ha | "
+                        f"WGS84: {ha2:.2f} ha"
+                    )
+                else:
+                    st.warning("⚠️ Cần tối thiểu 3 điểm để tính diện tích")
 
+        # --- Hiện chiều dài cạnh ---
         with col_btn3:
             if st.button("📏 Hiện cạnh"):
                 st.session_state.show_lengths = not st.session_state.get("show_lengths", False)
 
+        # --- Vẽ bản đồ ---
         m = folium.Map(
             location=[dfm.iloc[0]["Vĩ độ (Lat)"], dfm.iloc[0]["Kinh độ (Lon)"]],
             zoom_start=15
         )
-        dfm = dfm.sort_values("Tên điểm", key=lambda c: c.map(sort_point_name))
+
         pts = [(r["Vĩ độ (Lat)"], r["Kinh độ (Lon)"]) for _, r in dfm.iterrows()]
+
         if st.session_state.get("join_points", False):
             draw_polygon(m, pts)
             if st.session_state.get("show_lengths", False):
@@ -199,6 +207,7 @@ with col_map:
 
         add_numbered_markers(m, dfm)
         st_folium(m, width="100%", height=400)
+
 
 # =========================
 # Footer
