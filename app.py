@@ -47,21 +47,82 @@ with col2:
 
 # --- Longitude zone selector ---
 lon0_choices = {
-    104.5: "Kiên Giang, Cà Mau",
-    104.75: "Lào Cai, Phú Thọ, Nghệ An, An Giang",
-    105.0: "Vĩnh Phúc, Hà Nam, Ninh Bình, Thanh Hóa, Đồng Tháp, TP. Cần Thơ, Hậu Giang, Bạc Liêu",
-    105.5: "Hà Giang, Bắc Ninh, Hải Dương, Hưng Yên, Nam Định, Thái Bình, Hà Tĩnh, Tây Ninh, Vĩnh Long, Trà Vinh",
-    105.75: "TP. Hải Phòng, Bình Dương, Long An, Tiền Giang, Bến Tre, TP. HỒ Chí Minh",
-    106.0: "Tuyên Quang, Hòa Bình, Quảng Bình",
-    106.25: "Quảng Trị, Bình Phước",
-    106.5: "Bắc Kạn, Thái Nguyên",
-    107.0: "Bắc Giang, Thừa Thiên – Huế",
-    107.25: "Lạng Sơn",
-    107.5: "Kon Tum",
-    107.75: "TP. Đà Nẵng, Quảng Nam, Đồng Nai, Bà Rịa – Võng Tàu, Lâm Đồng",
-    108.0: "Quảng Ngãi",
-    108.25: "Bình Định, Khánh Hòa, Ninh Thuận",
-    108.5: "Gia Lai, Đắk Lắk, Đắk Nông, Phú Yên, Bình Thuận"
+    "Lai Châu": 103.0,
+    "Sơn La": 104.0,
+
+    "Kiên Giang": 104.5,
+    "Cà Mau": 104.5,
+
+    "Lào Cai": 104.75,
+    "Yên Bái": 104.75,
+    "Nghệ An": 104.75,
+    "Phú Thọ": 104.75,
+    "An Giang": 104.75,
+
+    "Thanh Hóa": 105.0,
+    "Vĩnh Phúc": 105.0,
+    "Hà Tây": 105.0,
+    "Đồng Tháp": 105.0,
+    "Cần Thơ": 105.0,
+    "Bạc Liêu": 105.0,
+    "Hà Nội": 105.0,
+    "Ninh Bình": 105.0,
+    "Hà Nam": 105.0,
+
+    "Hà Giang": 105.5,
+    "Hải Dương": 105.5,
+    "Hà Tĩnh": 105.5,
+    "Bắc Ninh": 105.5,
+    "Hưng Yên": 105.5,
+    "Thái Bình": 105.5,
+    "Nam Định": 105.5,
+    "Tây Ninh": 105.5,
+    "Vĩnh Long": 105.5,
+    "Sóc Trăng": 105.5,
+    "Trà Vinh": 105.5,
+
+    "Cao Bằng": 105.75,
+    "Long An": 105.75,
+    "Tiền Giang": 105.75,
+    "Bến Tre": 105.75,
+    "Hải Phòng": 105.75,
+    "TP. Hồ Chí Minh": 105.75,
+    "Bình Dương": 105.75,
+
+    "Tuyên Quang": 106.0,
+    "Hòa Bình": 106.0,
+    "Quảng Bình": 106.0,
+
+    "Quảng Trị": 106.25,
+    "Bình Phước": 106.25,
+
+    "Bắc Kạn": 106.5,
+    "Thái Nguyên": 106.5,
+
+    "Bắc Giang": 107.0,
+    "Thừa Thiên Huế": 107.0,
+
+    "Lạng Sơn": 107.25,
+
+    "Kon Tum": 107.5,
+
+    "Quảng Ninh": 107.75,
+    "Đồng Nai": 107.75,
+    "Bà Rịa – Vũng Tàu": 107.75,
+    "Quảng Nam": 107.75,
+    "Lâm Đồng": 107.75,
+    "Đà Nẵng": 107.75,
+
+    "Quảng Ngãi": 108.0,
+
+    "Ninh Thuận": 108.25,
+    "Khánh Hòa": 108.25,
+    "Bình Định": 108.25,
+
+    "Đắk Lắk": 108.5,
+    "Phú Yên": 108.5,
+    "Gia Lai": 108.5,
+    "Bình Thuận": 108.5
 }
 lon0_display = [f"{lon} – {province}" for lon, province in lon0_choices.items()]
 default_index = list(lon0_choices.keys()).index(106.25)
