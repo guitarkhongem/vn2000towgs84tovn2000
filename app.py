@@ -133,13 +133,20 @@ with col_mid:
     if "df" in st.session_state:
         df = st.session_state.df
         st.dataframe(df)
+
+        st.download_button(
+            "📀 CSV",
+            df.to_csv(index=False),
+            "points.csv"
+        )
+
     if "textout" in st.session_state:
-    st.text_area(
-        "📄 Text kết quả (copy nhanh)",
-        st.session_state.textout,
-        height=200
-    )
-        st.download_button("📀 CSV", df.to_csv(index=False), "points.csv")
+        st.text_area(
+            "📄 Text kết quả (copy nhanh)",
+            st.session_state.textout,
+            height=200
+        )
+
 
         kml = df_to_kml(df)
         if kml:
