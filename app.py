@@ -117,6 +117,11 @@ with tab2:
 )
 st.session_state.df = df
 
+st.session_state.textout = "\n".join(
+    f"{r['Tên điểm']} {r['X (m)']} {r['Y (m)']} {r['H (m)']}"
+    for _, r in df.iterrows()
+)
+
 # =========================
 # Output + CAD
 # =========================
@@ -124,7 +129,12 @@ with col_mid:
     if "df" in st.session_state:
         df = st.session_state.df
         st.dataframe(df)
-
+    if "textout" in st.session_state:
+    st.text_area(
+        "📄 Text kết quả (copy nhanh)",
+        st.session_state.textout,
+        height=200
+    )
         st.download_button("📀 CSV", df.to_csv(index=False), "points.csv")
 
         kml = df_to_kml(df)
