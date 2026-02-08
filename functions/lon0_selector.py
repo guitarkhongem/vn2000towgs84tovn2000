@@ -73,19 +73,19 @@ LON0_BY_PROVINCE = {
 def select_lon0():
     st.markdown("### 🫐 Chọn múi chiếu VN-2000")
 
-    # Đặt NGAY dưới tiêu đề, canh trái theo layout chung
-    col1, col2 = st.columns([2, 1])
+    # Cột tỉnh hẹp ~1/4, cột nhập lon0 vừa, phần còn lại làm trống
+    col_province, col_lon0, _ = st.columns([1, 1, 2])
 
-    with col1:
+    with col_province:
         province = st.selectbox(
             "Chọn tỉnh / thành phố",
             ["-- Không chọn --"] + sorted(LON0_BY_PROVINCE.keys()),
             index=0
         )
 
-    with col2:
+    with col_lon0:
         manual_lon0 = st.number_input(
-            "Hoặc nhập kinh tuyến trục",
+            "Hoặc nhập kinh tuyến trục (decimal)",
             min_value=102.0,
             max_value=110.0,
             value=106.25,
@@ -100,4 +100,5 @@ def select_lon0():
         st.info(f"Dùng kinh tuyến trục nhập tay: {lon0} (decimal)")
 
     return lon0
+
 
