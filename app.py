@@ -1,14 +1,12 @@
 import os
+import re
+import tempfile
+
 import streamlit as st
 import pandas as pd
-import re
 import folium
 from streamlit_folium import st_folium
-from shapely.geometry import Polygon, LineString
 from PIL import Image
-from functions.EdgeLengths import compute_edge_lengths
-
-import tempfile
 
 # --- Custom functions ---
 from functions.background import set_background
@@ -21,25 +19,35 @@ from functions.markers import add_numbered_markers
 from functions.polygon import draw_polygon
 from functions.area import compare_areas
 from functions.lon0_selector import select_lon0
+from functions.sort_utils import sort_point_name
+from functions.EdgeLengths import compute_edge_lengths
 
-# --- Page setup ---
+# =========================
+# Page setup
+# =========================
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
 set_background("assets/background.png")
 
-st.markdown("""
-<style>
-div.stButton > button, div.stDownloadButton > button {
-    color: #B30000;
-    font-weight: bold;
-}
-iframe {
-    height: 400px !important;
-    min-height: 400px !important;
-}
-.css-1aumxhk { width: 100% !important; }
-</style>
-""", unsafe_allow_html=True)
+st.markdown(
+    """
+    <style>
+    div.stButton > button, div.stDownloadButton > button {
+        color: #B30000;
+        font-weight: bold;
+    }
+    iframe {
+        height: 400px !important;
+        min-height: 400px !important;
+    }
+    .css-1aumxhk { width: 100% !important; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
+# =========================
+# Header
+# =========================
 col1, col2 = st.columns([1, 5])
 with col1:
     st.image("assets/logo.jpg", width=90)
@@ -47,13 +55,19 @@ with col2:
     st.title("VN2000 ⇄ WGS84 Converter")
     st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA")
 
-# --- Longitude zone selector ---
+# =========================
+# Longitude zone selector
+# =========================
 lon0 = select_lon0()
 
-# --- Main layout columns ---
+# =========================
+# Main layout
+# =========================
 col_left, col_mid, col_map = st.columns([1, 1, 2])
 
-# --- Input column ---
+# =========================
+# Input column
+# =========================
 with col_left:
     st.markdown("## 📄 Upload hoặc nhập toạ độ")
     uploaded_file = st.file_uploader("Tải file TXT hoặc CSV", type=["txt", "csv"])
@@ -64,7 +78,8 @@ with col_left:
 
     coords_input = st.text_area("Nội dung toạ độ", value=content, height=180)
 
-    st.markdown("""
+    st.markdown(
+        """
         | STT | Định dạng nhập                            | Ghi chú                             |
         |-----|--------------------------------------------|--------------------------------------|
         | 1   | `E12345678 N56781234`                      | EN mã hiệu                           |
@@ -73,19 +88,24 @@ with col_left:
         | 4   | `1838446.03 550074.77`                    | X Y                                  |
         | 5   | `1838446.03 550074.77 37.98`              | X Y H                                |
 
-        ✅ **Phân cách** có thể là: khoảng trắng, tab, hoặc xuống dòng.  
-    """, unsafe_allow_html=True)
+        ✅ **Phân cách** có thể là: khoảng trắng, tab, dấu phẩy hoặc xuống dòng.  
+        """,
+        unsafe_allow_html=True,
+    )
 
     st.markdown("### 🔄 Chuyển đổi toạ độ")
     tab1, tab2 = st.tabs(["VN2000 ➔ WGS84", "WGS84 ➔ VN2000"])
 
+# =========================
+# VN2000 ➜ WGS84
+# =========================
 with tab1:
     if st.button("➡️ Chuyển sang WGS84"):
         parsed, errors = parse_coordinates(coords_input)
         if parsed:
             df = pd.DataFrame(
                 [(ten, *vn2000_to_wgs84_baibao(x, y, h, lon0)) for ten, x, y, h in parsed],
-                columns=["STT", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]
+                columns=["STT", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"],
             )
             df["Tên điểm"] = df["STT"]
             st.session_state.df = df[["Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]]
@@ -97,6 +117,9 @@ with tab1:
         else:
             st.error("⚠️ Không có dữ liệu hợp lệ!")
 
+# =========================
+# WGS84 ➜ VN2000
+# =========================
 with tab2:
     if st.button("⬅️ Chuyển sang VN2000"):
         tokens = re.split(r"[\s\n]+", coords_input.strip())
@@ -108,7 +131,7 @@ with tab2:
                 if i < len(tokens):
                     try:
                         chunk.append(float(tokens[i].replace(",", ".")))
-                    except:
+                    except Exception:
                         break
                     i += 1
             if len(chunk) == 2:
@@ -120,9 +143,9 @@ with tab2:
 
         if coords:
             df = pd.DataFrame(
-                [(str(i+1), *wgs84_to_vn2000_baibao(lat, lon, h, lon0))
+                [(str(i + 1), *wgs84_to_vn2000_baibao(lat, lon, h, lon0))
                  for i, (lat, lon, h) in enumerate(coords)],
-                columns=["Tên điểm", "X (m)", "Y (m)", "h (m)"]
+                columns=["Tên điểm", "X (m)", "Y (m)", "h (m)"],
             )
             st.session_state.df = df
             st.session_state.textout = "\n".join(
@@ -133,7 +156,9 @@ with tab2:
         else:
             st.error("⚠️ Không có dữ liệu hợp lệ!")
 
-# --- Output preview ---
+# =========================
+# Output preview
+# =========================
 with col_mid:
     st.markdown("### 📊 Kết quả")
     if "df" in st.session_state:
@@ -147,7 +172,7 @@ with col_mid:
                 label="📀 Tải CSV",
                 data=df.to_csv(index=False).encode("utf-8"),
                 file_name="converted_points.csv",
-                mime="text/csv"
+                mime="text/csv",
             )
         with col_kml:
             kml = df_to_kml(df)
@@ -156,15 +181,16 @@ with col_mid:
                     label="📀 Tải KML",
                     data=kml,
                     file_name="converted_points.kml",
-                    mime="application/vnd.google-earth.kml+xml"
+                    mime="application/vnd.google-earth.kml+xml",
                 )
 
         if st.session_state.get("join_points", False) and st.session_state.get("show_lengths", False):
             df_sorted = df.sort_values(
                 by="Tên điểm",
-                key=lambda col: col.map(lambda x: int(x) if str(x).isdigit() else str(x)),
-                ascending=True
+                key=lambda col: col.map(sort_point_name),
+                ascending=True,
             ).reset_index(drop=True)
+
             points = [(row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"]) for _, row in df_sorted.iterrows()]
             if points:
                 df_edges = compute_edge_lengths(points)
@@ -174,17 +200,19 @@ with col_mid:
                     label="📤 Tải bảng độ dài cạnh (CSV)",
                     data=df_edges.to_csv(index=False).encode("utf-8"),
                     file_name="edge_lengths.csv",
-                    mime="text/csv"
+                    mime="text/csv",
                 )
 
-# --- Map rendering ---
+# =========================
+# Map rendering
+# =========================
 with col_map:
     st.markdown("### 🗺️ Bản đồ")
-    if "df" in st.session_state and {"Vĩ độ (Lat)", "Kinh độ (Lon)"}.issubset(st.session_state.df.columns):
+    if "df" in st.session_state and {"Vĩ độ (Lat)", "Kinh độ (Lon)"} <= set(st.session_state.df.columns):
         df_sorted = st.session_state.df.sort_values(
             by="Tên điểm",
-            key=lambda col: col.map(lambda x: int(x) if str(x).isdigit() else str(x)),
-            ascending=True
+            key=lambda col: col.map(sort_point_name),
+            ascending=True,
         ).reset_index(drop=True)
 
         map_type = st.selectbox("Chế độ bản đồ", options=["Giao Thông", "Vệ tinh"], index=0)
@@ -194,7 +222,6 @@ with col_map:
         with col_btn1:
             if st.button("🔵 Nối các điểm"):
                 st.session_state.join_points = not st.session_state.get("join_points", False)
-
         with col_btn2:
             if st.button("📐 Tính diện tích VN2000 / WGS84"):
                 parsed, errors = parse_coordinates(coords_input)
@@ -203,14 +230,15 @@ with col_map:
                     latlon_points = [(row["Vĩ độ (Lat)"], row["Kinh độ (Lon)"])
                                      for _, row in st.session_state.df.iterrows()]
                     A1, A2, diff, ha1, ha2 = compare_areas(xy_points, latlon_points)
-                    st.markdown(f"""
-                    ### 📐 So sánh diện tích
-                    🧮 Shoelace (VN2000): `{A1:,.1f} m²` (~{ha1:.1f} ha)  
-                    🌍 Geodesic (WGS84): `{A2:,.1f} m²` (~{ha2:.1f} ha)
-                    """)
+                    st.markdown(
+                        f"""
+                        ### 📐 So sánh diện tích
+                        🧮 Shoelace (VN2000): `{A1:,.1f} m²` (~{ha1:.1f} ha)  
+                        🌍 Geodesic (WGS84): `{A2:,.1f} m²` (~{ha2:.1f} ha)
+                        """
+                    )
                 else:
                     st.warning("⚠️ Dữ liệu đầu vào không hợp lệ hoặc chưa có.")
-
         with col_btn3:
             if st.button("📏 Hiện kích thước cạnh"):
                 st.session_state.show_lengths = not st.session_state.get("show_lengths", False)
@@ -218,18 +246,17 @@ with col_map:
         m = folium.Map(
             location=[df_sorted.iloc[0]["Vĩ độ (Lat)"], df_sorted.iloc[0]["Kinh độ (Lon)"]],
             zoom_start=15,
-            tiles=tileset
+            tiles=tileset,
         )
 
         first_point = df_sorted.iloc[0]
-        lat = first_point["Vĩ độ (Lat)"]
-        lon = first_point["Kinh độ (Lon)"]
+        lat, lon = first_point["Vĩ độ (Lat)"], first_point["Kinh độ (Lon)"]
 
         folium.Marker(
             location=[lat, lon],
             popup=f"<b>{first_point['Tên điểm']}</b>",
             tooltip="📍 Vị trí điểm đầu",
-            icon=folium.Icon(color='red', icon='map-marker', prefix='fa')
+            icon=folium.Icon(color="red", icon="map-marker", prefix="fa"),
         ).add_to(m)
 
         if st.session_state.get("join_points", False):
@@ -243,5 +270,7 @@ with col_map:
 
         st_folium(m, width="100%", height=400)
 
-# --- Footer ---
+# =========================
+# Footer
+# =========================
 show_footer()
