@@ -89,7 +89,7 @@ st.session_state.textout = "\n".join(
     f"{r['Tên điểm']} {r['Vĩ độ (Lat)']} {r['Kinh độ (Lon)']} {r['H (m)']}"
     for _, r in df.iterrows()
 )
-    else:
+        else:
             st.error("Không có dữ liệu hợp lệ")
 
 # =========================
