@@ -1,5 +1,6 @@
 streamlit
 pandas
-streamlit-folium
 folium
+streamlit-folium
 shapely
+geographiclib
