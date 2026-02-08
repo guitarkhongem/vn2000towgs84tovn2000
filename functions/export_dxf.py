@@ -3,7 +3,7 @@ import ezdxf
 
 def export_to_dxf(points, filepath):
     """
-    points: list of (name, x, y)
+    points: list of (name, x, y)  # x = Easting, y = Northing (VN2000)
     filepath: output dxf path
     """
 
@@ -11,14 +11,19 @@ def export_to_dxf(points, filepath):
     msp = doc.modelspace()
 
     # --- Layers ---
-    doc.layers.new(name="POINTS", dxfattribs={"color": 1})
-    doc.layers.new(name="TEXT", dxfattribs={"color": 3})
+    if "POINTS" not in doc.layers:
+        doc.layers.new(name="POINTS", dxfattribs={"color": 1})
+    if "TEXT" not in doc.layers:
+        doc.layers.new(name="TEXT", dxfattribs={"color": 3})
 
     for name, x, y in points:
-        # Điểm
-        msp.add_point((x, y), dxfattribs={"layer": "POINTS"})
+        # --- Vẽ điểm (ĐÚNG TRỤC) ---
+        msp.add_point(
+            (x, y),
+            dxfattribs={"layer": "POINTS"}
+        )
 
-        # Text tên điểm
+        # --- Ghi tên điểm (lệch nhẹ để dễ nhìn) ---
         txt = msp.add_text(
             str(name),
             dxfattribs={
@@ -26,6 +31,6 @@ def export_to_dxf(points, filepath):
                 "layer": "TEXT"
             }
         )
-        txt.dxf.insert = (x + 1, y + 1)
+        txt.dxf.insert = (x + 1.0, y + 1.0)
 
     doc.saveas(filepath)
