@@ -73,36 +73,35 @@ LON0_BY_PROVINCE = {
 def select_lon0():
     st.markdown("### 🫐 Chọn múi chiếu VN-2000")
 
-    # Khởi tạo session_state nếu chưa có
+    # Khởi tạo state
     if "lon0_value" not in st.session_state:
         st.session_state.lon0_value = 106.25
+    if "province_select" not in st.session_state:
+        st.session_state.province_select = "-- Không chọn --"
 
     col_province, col_lon0 = st.columns(2)
 
+    # --- Chọn tỉnh ---
     with col_province:
         province = st.selectbox(
             "Chọn tỉnh / thành phố",
             ["-- Không chọn --"] + sorted(LON0_BY_PROVINCE.keys()),
-            index=0,
             key="province_select"
         )
 
-    # 👉 Nếu chọn tỉnh → cập nhật lon0 theo tỉnh
+    # 👉 Nếu chọn tỉnh → cập nhật lon0 NGAY
     if province != "-- Không chọn --":
         st.session_state.lon0_value = LON0_BY_PROVINCE[province]
 
+    # --- Nhập lon0 (LUÔN đọc từ session_state) ---
     with col_lon0:
-        lon0 = st.number_input(
+        st.number_input(
             "Hoặc nhập kinh tuyến trục (decimal)",
             min_value=102.0,
             max_value=110.0,
-            value=st.session_state.lon0_value,
             step=0.25,
-            key="lon0_input"
+            key="lon0_value"
         )
-
-    # 👉 Nếu người dùng nhập tay → ghi đè lại session_state
-    st.session_state.lon0_value = lon0
 
     # Hiển thị trạng thái
     if province != "-- Không chọn --":
@@ -117,6 +116,7 @@ def select_lon0():
         )
 
     return st.session_state.lon0_value
+
 
 
 
