@@ -29,22 +29,17 @@ from functions.export_dxf import export_to_dxf
 st.set_page_config(page_title="VN2000 ⇄ WGS84 Converter", layout="wide")
 set_background("assets/background.png")
 
-st.markdown(
-    """
-    <style>
-    div.stButton > button, div.stDownloadButton > button {
-        color: #B30000;
-        font-weight: bold;
-    }
-    iframe {
-        height: 400px !important;
-        min-height: 400px !important;
-    }
-    .css-1aumxhk { width: 100% !important; }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+st.markdown("""
+<style>
+div.stButton > button, div.stDownloadButton > button {
+    color: #B30000;
+    font-weight: bold;
+}
+iframe {
+    height: 400px !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # =========================
 # Header
@@ -57,62 +52,40 @@ with col2:
     st.markdown("### BẤT ĐỘNG SẢN HUYỆN HƯỚNG HÓA")
 
 # =========================
-# Longitude zone selector
+# Longitude selector
 # =========================
 lon0 = select_lon0()
 
 # =========================
-# Main layout
+# Layout
 # =========================
 col_left, col_mid, col_map = st.columns([1, 1, 2])
 
 # =========================
-# Input column
+# Input
 # =========================
 with col_left:
-    st.markdown("## 📄 Upload hoặc nhập toạ độ")
-    uploaded_file = st.file_uploader("Tải file TXT hoặc CSV", type=["txt", "csv"])
+    uploaded_file = st.file_uploader("📄 Upload TXT / CSV", ["txt", "csv"])
+    content = uploaded_file.read().decode("utf-8") if uploaded_file else ""
+    coords_input = st.text_area("Toạ độ", content, height=180)
 
-    content = ""
-    if uploaded_file is not None:
-        content = uploaded_file.read().decode("utf-8")
-
-    coords_input = st.text_area("Nội dung toạ độ", value=content, height=180)
-
-    st.markdown(
-        """
-        | STT | Định dạng nhập | Ghi chú |
-        |-----|---------------|--------|
-        | 1 | `E12345678 N56781234` | EN |
-        | 2 | `A01 X Y H` | STT X Y H |
-        | 3 | `A01 X Y` | STT X Y |
-        | 4 | `X Y` | XY |
-        | 5 | `X Y H` | XYH |
-
-        ✅ Phân cách: khoảng trắng, tab, dấu phẩy, xuống dòng
-        """,
-        unsafe_allow_html=True,
-    )
-
-    st.markdown("### 🔄 Chuyển đổi toạ độ")
-    tab1, tab2 = st.tabs(["VN2000 ➔ WGS84", "WGS84 ➔ VN2000"])
+    st.markdown("### 🔄 Chuyển đổi")
+    tab1, tab2 = st.tabs(["VN2000 ➜ WGS84", "WGS84 ➜ VN2000"])
 
 # =========================
 # VN2000 ➜ WGS84
 # =========================
 with tab1:
     if st.button("➡️ Chuyển sang WGS84"):
-        parsed, errors = parse_coordinates(coords_input)
+        parsed, _ = parse_coordinates(coords_input)
         if parsed:
             df = pd.DataFrame(
-                [(ten, *vn2000_to_wgs84_baibao(x, y, h, lon0)) for ten, x, y, h in parsed],
-                columns=["STT", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"],
+                [(t, *vn2000_to_wgs84_baibao(x, y, h, lon0)) for t, x, y, h in parsed],
+                columns=["Tên điểm", "Vĩ độ (Lat)", "Kinh độ (Lon)", "H (m)"]
             )
-            df["Tên điểm"] = df["STT"]
             st.session_state.df = df
-            st.success(f"✅ Đã xử lý {len(df)} điểm.")
         else:
-            st.error("⚠️ Không có dữ liệu hợp lệ!")
+            st.error("Không có dữ liệu hợp lệ")
 
 # =========================
 # WGS84 ➜ VN2000
@@ -120,122 +93,94 @@ with tab1:
 with tab2:
     if st.button("⬅️ Chuyển sang VN2000"):
         tokens = re.split(r"[,\s\n]+", coords_input.strip())
-        coords = []
+        pts = []
         i = 0
         while i + 1 < len(tokens):
             try:
-                lat = float(tokens[i])
-                lon = float(tokens[i + 1])
-                h = float(tokens[i + 2]) if i + 2 < len(tokens) else 0.0
-                coords.append((lat, lon, h))
+                lat, lon = float(tokens[i]), float(tokens[i+1])
+                h = float(tokens[i+2]) if i+2 < len(tokens) else 0
+                pts.append((lat, lon, h))
                 i += 3
             except:
                 i += 1
 
-        if coords:
+        if pts:
             df = pd.DataFrame(
-                [(str(i + 1), *wgs84_to_vn2000_baibao(lat, lon, h, lon0))
-                 for i, (lat, lon, h) in enumerate(coords)],
-                columns=["Tên điểm", "X (m)", "Y (m)", "h (m)"],
+                [(str(i+1), *wgs84_to_vn2000_baibao(lat, lon, h, lon0))
+                 for i, (lat, lon, h) in enumerate(pts)],
+                columns=["Tên điểm", "X (m)", "Y (m)", "H (m)"]
             )
             st.session_state.df = df
-            st.success(f"✅ Đã xử lý {len(df)} điểm.")
-        else:
-            st.error("⚠️ Không có dữ liệu hợp lệ!")
 
 # =========================
-# Output preview + CAD
+# Output + CAD
 # =========================
 with col_mid:
-    st.markdown("### 📊 Kết quả")
     if "df" in st.session_state:
         df = st.session_state.df
-        st.dataframe(df, height=250)
+        st.dataframe(df)
 
-        col_csv, col_kml = st.columns(2)
-        with col_csv:
-            st.download_button(
-                "📀 Tải CSV",
-                df.to_csv(index=False).encode("utf-8"),
-                "converted_points.csv",
-                "text/csv",
-            )
+        st.download_button("📀 CSV", df.to_csv(index=False), "points.csv")
 
-        with col_kml:
-            kml = df_to_kml(df)
-            if kml:
-                st.download_button(
-                    "📀 Tải KML",
-                    kml,
-                    "converted_points.kml",
-                    "application/vnd.google-earth.kml+xml",
-                )
+        kml = df_to_kml(df)
+        if kml:
+            st.download_button("🌍 KML", kml, "points.kml")
 
-        st.markdown("### 🧱 Xuất bản vẽ CAD (DXF)")
+        st.markdown("### 🧱 Xuất CAD (DXF)")
+        if st.button("📐 Xuất DXF"):
+            pts = []
 
-if st.button("📐 Xuất file CAD (DXF)"):
+            if {"X (m)", "Y (m)"} <= set(df.columns):
+                pts = [(r["Tên điểm"], r["X (m)"], r["Y (m)"]) for _, r in df.iterrows()]
+            else:
+                parsed, _ = parse_coordinates(coords_input)
+                pts = [(t, x, y) for t, x, y, _ in parsed]
 
-    pts = []
-
-    # --- Trường hợp 1: Kết quả đang là VN2000 ---
-    if {"X (m)", "Y (m)"} <= set(df.columns):
-        pts = [
-            (row["Tên điểm"], row["X (m)"], row["Y (m)"])
-            for _, row in df.iterrows()
-        ]
-
-    # --- Trường hợp 2: Kết quả là WGS84 → lấy lại VN2000 từ input ---
-    else:
-        parsed, errors = parse_coordinates(coords_input)
-        if parsed:
-            pts = [
-                (ten, x, y)
-                for ten, x, y, h in parsed
-            ]
-
-    # --- Xuất DXF nếu có điểm hợp lệ ---
-    if pts:
-        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".dxf")
-        export_to_dxf(pts, tmp.name)
-
-        with open(tmp.name, "rb") as f:
-            st.download_button(
-                "⬇️ Tải file DXF",
-                f,
-                file_name="toado_vn2000.dxf",
-                mime="application/dxf"
-            )
-    else:
-        st.error("❌ Không tìm thấy toạ độ VN2000 hợp lệ để xuất CAD.")
-
+            if pts:
+                tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".dxf")
+                export_to_dxf(pts, tmp.name)
+                st.download_button("⬇️ Tải DXF", open(tmp.name, "rb"), "toado_vn2000.dxf")
 
 # =========================
-# Map rendering (GIỮ NGUYÊN)
+# Map
 # =========================
 with col_map:
-    st.markdown("### 🗺️ Bản đồ")
     if "df" in st.session_state and {"Vĩ độ (Lat)", "Kinh độ (Lon)"} <= set(st.session_state.df.columns):
-        df_sorted = st.session_state.df.sort_values(
-            by="Tên điểm",
-            key=lambda c: c.map(sort_point_name),
+        dfm = st.session_state.df.sort_values(
+            "Tên điểm", key=lambda c: c.map(sort_point_name)
         )
 
-        map_type = st.selectbox("Chế độ bản đồ", ["Giao Thông", "Vệ tinh"])
-        tileset = "OpenStreetMap" if map_type == "Giao Thông" else "Esri.WorldImagery"
+        col_btn1, col_btn2, col_btn3 = st.columns(3)
+
+        with col_btn1:
+            if st.button("🔵 Nối điểm"):
+                st.session_state.join_points = not st.session_state.get("join_points", False)
+
+        with col_btn2:
+            if st.button("📐 Tính diện tích"):
+                parsed, _ = parse_coordinates(coords_input)
+                if parsed:
+                    xy = [(x, y) for _, x, y, _ in parsed]
+                    latlon = [(r["Vĩ độ (Lat)"], r["Kinh độ (Lon)"]) for _, r in dfm.iterrows()]
+                    A1, A2, _, ha1, ha2 = compare_areas(xy, latlon)
+                    st.info(f"VN2000: {ha1:.2f} ha | WGS84: {ha2:.2f} ha")
+
+        with col_btn3:
+            if st.button("📏 Hiện cạnh"):
+                st.session_state.show_lengths = not st.session_state.get("show_lengths", False)
 
         m = folium.Map(
-            location=[df_sorted.iloc[0]["Vĩ độ (Lat)"], df_sorted.iloc[0]["Kinh độ (Lon)"]],
-            zoom_start=15,
-            tiles=tileset,
+            location=[dfm.iloc[0]["Vĩ độ (Lat)"], dfm.iloc[0]["Kinh độ (Lon)"]],
+            zoom_start=15
         )
 
+        pts = [(r["Vĩ độ (Lat)"], r["Kinh độ (Lon)"]) for _, r in dfm.iterrows()]
         if st.session_state.get("join_points", False):
-            pts = [(r["Vĩ độ (Lat)"], r["Kinh độ (Lon)"]) for _, r in df_sorted.iterrows()]
             draw_polygon(m, pts)
-            add_numbered_markers(m, df_sorted)
-        else:
-            add_numbered_markers(m, df_sorted)
+            if st.session_state.get("show_lengths", False):
+                add_edge_lengths(m, pts)
 
+        add_numbered_markers(m, dfm)
         st_folium(m, width="100%", height=400)
 
 # =========================
