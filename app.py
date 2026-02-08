@@ -157,13 +157,30 @@ with col_map:
                 st.session_state.join_points = not st.session_state.get("join_points", False)
 
         with col_btn2:
-            if st.button("📐 Tính diện tích"):
-                parsed, _ = parse_coordinates(coords_input)
-                if parsed:
-                    xy = [(x, y) for _, x, y, _ in parsed]
-                    latlon = [(r["Vĩ độ (Lat)"], r["Kinh độ (Lon)"]) for _, r in dfm.iterrows()]
-                    A1, A2, _, ha1, ha2 = compare_areas(xy, latlon)
-                    st.info(f"VN2000: {ha1:.2f} ha | WGS84: {ha2:.2f} ha")
+    if st.button("📐 Tính diện tích"):
+        # Lấy XY VN2000 một cách chắc chắn
+        if {"X (m)", "Y (m)"} <= set(st.session_state.df.columns):
+            xy_points = [
+                (r["X (m)"], r["Y (m)"])
+                for _, r in st.session_state.df.iterrows()
+            ]
+        else:
+            parsed, _ = parse_coordinates(coords_input)
+            xy_points = [(x, y) for _, x, y, _ in parsed]
+
+        latlon_points = [
+            (r["Vĩ độ (Lat)"], r["Kinh độ (Lon)"])
+            for _, r in dfm.iterrows()
+        ]
+
+        if len(xy_points) >= 3:
+            A1, A2, _, ha1, ha2 = compare_areas(xy_points, latlon_points)
+            st.info(
+                f"📐 Diện tích VN2000: {ha1:.2f} ha | "
+                f"WGS84: {ha2:.2f} ha"
+            )
+        else:
+            st.warning("⚠️ Cần tối thiểu 3 điểm để tính diện tích")
 
         with col_btn3:
             if st.button("📏 Hiện cạnh"):
