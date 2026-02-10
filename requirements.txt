@@ -1,7 +1,9 @@
 streamlit
 pandas
+numpy
 folium
 streamlit-folium
 shapely
-geographiclib
+pyproj
+Pillow
 ezdxf
